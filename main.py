@@ -21,11 +21,11 @@ import pyqtgraph as pg
 from export import export_as_csv
 from interface import Ui_MainWindow
 from signal_processing import (
+    calculate_indexes,
     cubic_spline,
     linear_interp,
     open_data_file,
     shift_signal,
-    tfa,
 )
 
 
@@ -55,6 +55,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # File menu
         self.menu_file_open_action.setShortcut("Ctrl+O")
         self.menu_file_open_action.triggered.connect(self.open_file)
+
+        # Settings menu
+        self.menu_analysis_method_frequency_band.triggered.connect(
+            self.set_frequency_band_analysis_method
+        )
+        self.menu_analysis_method_point_estimate.triggered.connect(
+            self.set_point_estimate_analysis_method
+        )
+        self.menu_analysis_method_ask_on_new_file.triggered.connect(
+            self.set_ask_on_new_file_method
+        )
 
         # Save results menu
         self.menu_save_results_action.setShortcut("Ctrl+S")
@@ -216,6 +227,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.coherenceThreshold.setEnabled(not self.radioButtonSimulatedCoherence.isChecked())
 
     @property
+    def is_point_estimate_analysis(self):
+        return self.analysis_options["method"] == "point-estimate"
+
+    @property
     def duration(self):
         if self.time is not None:
             return self.time[-1]
@@ -276,6 +291,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "window": windows[self.windowComboBox.currentIndex()],
             "coherence_threshold": float(self.coherenceThreshold.text()),
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
+            "method": "point-estimate",
+            "point_estimate_frequency": 0.1,
         }
 
     @property
@@ -314,6 +331,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _update_edit_time_ranges(self, region):
         self.lineEditStartTimeAxes.setText(f"{region[0]:.2f}")
         self.lineEditEndTimeAxes.setText(f"{region[1]:.2f}")
+
+    def set_frequency_band_analysis_method(self):
+        self.menu_analysis_method_point_estimate.setChecked(False)
+        self.menu_analysis_method_ask_on_new_file.setChecked(False)
+        self.analysis_options["method"] = "frequency-band"
+        self._update_frequency_panel()
+
+    def set_point_estimate_analysis_method(self):
+        self.menu_analysis_method_frequency_band.setChecked(False)
+        self.menu_analysis_method_ask_on_new_file.setChecked(False)
+        self.analysis_options["method"] = "point-estimate"
+        self._update_frequency_panel()
+
+    def set_ask_on_new_file_method(self):
+        self.menu_analysis_method_frequency_band.setChecked(False)
+        self.menu_analysis_method_point_estimate.setChecked(False)
+        self.analysis_options["method"] = None
+
+    def _update_frequency_panel(self):
+        # Update frequency panel to point estimate or frequency band method
+        pass
 
     def open_file(self):
         self.file_path, _ = QFileDialog.getOpenFileName(
@@ -376,8 +414,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "nfft": self.analysis_options["segment_size"],  # TODO: allow use of zero padding
             "coherence_threshold": self.coherence_threshold,
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
+            "point_estimate_frequency": self.analysis_options["point_estimate_frequency"],
         }
-        self.results = tfa(interp_abp, interp_cbfv, fs, options=options)
+        method = "point-estimate"
+        self.results_pe = calculate_indexes(interp_abp, interp_cbfv, fs, method, options=options)
+        method = "tfa"
+        self.results = calculate_indexes(interp_abp, interp_cbfv, fs, method, options=options)
+        self.results["peak_frequency"] = self.results_pe["peak_frequency"]
+        self.results["peak_pxx"] = self.results_pe["peak_pxx"]
+        self.results["peak_pyy"] = self.results_pe["peak_pyy"]
         self._fill_table_results(self.results)
 
         # Update plots
@@ -524,6 +569,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             hf=self.hf_range,
             label="PSD ((cm/s)²/Hz)"
         )
+        if self.is_point_estimate_analysis:
+            self.plot_point_estimate_frequency(
+                axes,
+                point_estimate_frequency=self.results["peak_frequency"],
+                y_psd_frequency_peak=self.results["peak_pyy"],
+            )
 
     def plot_abp(self, axes):
         self.plot_time_series(
@@ -547,6 +598,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             hf=self.hf_range,
             label="PSD (mmHg²/Hz)",
         )
+        if self.is_point_estimate_analysis:
+            self.plot_point_estimate_frequency(
+                axes,
+                point_estimate_frequency=self.results["peak_frequency"],
+                y_psd_frequency_peak=self.results["peak_pxx"],
+            )
 
     def plot_gain(self, axes):
         freq = self.results["frequency"]
@@ -792,6 +849,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Add frequency band lines
         self._add_frequency_bands_lines(axes)
+
+    def plot_point_estimate_frequency(self, axes, point_estimate_frequency, y_psd_frequency_peak):
+        # Add line showing the point estimate frequency
+        axes.plot(
+            x=[point_estimate_frequency, point_estimate_frequency],
+            y=[0, y_psd_frequency_peak],
+            pen=pg.mkPen("r", width=3)
+        )
 
 
 if __name__ == "__main__":

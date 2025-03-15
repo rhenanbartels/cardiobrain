@@ -134,7 +134,7 @@ def smooth(psd, smooth_factor):
     return psd_filt
 
 
-def tfa(abp, cbfv, fs, options: dict = None):
+def estimate_psd(abp, cbfv, fs, options: dict = None):
     # TODO: docstring
     if options is None:
         options = dict()
@@ -230,6 +230,84 @@ def tfa(abp, cbfv, fs, options: dict = None):
         indexes = numpy.where(phase[numpy.where(frequency < cutoff)[0]] < 0)
         phase[indexes] = numpy.nan
 
+    results = {
+        "coherence_threshold_applied": apply_coherence_threshold,
+        "n_windows": n_windows,
+        "avg_abp": avg_abp,
+        "avg_cbfv": avg_cbfv,
+        "std_abp": std_abp,
+        "std_cbfv": std_cbfv,
+        "pxx": abs(pxx),
+        "pyy": abs(pyy),
+        "pxy": abs(pxy),
+        "gain": abs(gain),
+        "coherence": abs(coherence) ** 2,
+        "phase": phase,
+        "coherence_threshold": coherence_threshold,
+        "frequency": frequency,
+    }
+    return results
+
+
+def calculate_indexes(abp, cbfv, fs, method="tfa", options: dict = None):
+    results = estimate_psd(abp, cbfv, fs, options)
+    if method == "tfa":
+        results.update(
+            tfa(
+                results["frequency"],
+                results["pxx"],
+                results["pyy"],
+                results["gain"],
+                results["phase"],
+                results["coherence"],
+                results["avg_abp"],
+                results["avg_cbfv"],
+                options,
+            )
+        )
+    elif method == "point-estimate":
+        results.update(
+            point_estimate(
+                results["frequency"],
+                results["pxx"],
+                results["pyy"],
+                results["gain"],
+                results["phase"],
+                results["coherence"],
+                options["point_estimate_frequency"],
+            )
+        )
+
+    return results
+
+
+def point_estimate(frequency, pxx, pyy, gain, phase, coherence, point_estimate_frequency):
+    # get closest  existing frequency to 'point_estimate_frequency'
+    point_estimate_frequency_index = abs(point_estimate_frequency - frequency).argmin()
+    results = {
+        "peak_frequency": frequency[point_estimate_frequency_index],
+        "peak_pxx": pxx[point_estimate_frequency_index],
+        "peak_pyy": pyy[point_estimate_frequency_index],
+        "peak_gain": gain[point_estimate_frequency_index],
+        "peak_phase": phase[point_estimate_frequency_index],
+        "peak_coherence": coherence[point_estimate_frequency_index],
+    }
+    return results
+
+
+def tfa(frequency, pxx, pyy, gain, phase, coherence, avg_abp, avg_cbfv, options=None):
+    if options is None:
+        options = dict()
+
+    default_options = {
+        "vlf": (0.02, 0.07),
+        "lf": (0.07, 0.2),
+        "hf": (0.2, 0.5),
+        "normalize_cbfv": False,
+        "normalize_abp": False,
+    }
+    options = {**default_options, **options}
+
     results = frequency_bands_results(
         frequency,
         pxx,
@@ -251,20 +329,6 @@ def tfa(abp, cbfv, fs, options: dict = None):
         results["gain_lf_norm"] = results["gain_lf"] / avg_cbfv * 100
         results["gain_hf_norm"] = results["gain_hf"] / avg_cbfv * 100
 
-    results["coherence_threshold_applied"] = apply_coherence_threshold
-    results["n_windows"] = n_windows
-    results["avg_abp"] = avg_abp
-    results["avg_cbfv"] = avg_cbfv
-    results["std_abp"] = std_abp
-    results["std_cbfv"] = std_cbfv
-    results["pxx"] = abs(pxx)
-    results["pyy"] = abs(pyy)
-    results["pxy"] = abs(pxy)
-    results["gain"] = abs(gain)
-    results["coherence"] = abs(coherence) ** 2
-    results["phase"] = phase
-    results["coherence_threshold"] = coherence_threshold
-    results["frequency"] = frequency
     return results
 
 

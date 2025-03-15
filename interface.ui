@@ -1369,8 +1369,23 @@ QHeaderView::section {
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuSettings">
+     <property name="title">
+      <string>Settings</string>
+     </property>
+     <widget class="QMenu" name="menu_analysis_method">
+      <property name="title">
+       <string>Analysis method</string>
+      </property>
+      <addaction name="menu_analysis_method_frequency_band"/>
+      <addaction name="menu_analysis_method_point_estimate"/>
+      <addaction name="menu_analysis_method_ask_on_new_file"/>
+     </widget>
+     <addaction name="menu_analysis_method"/>
+    </widget>
     <addaction name="menu_file_open_action"/>
     <addaction name="menu_save_results_action"/>
+    <addaction name="menuSettings"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -1385,6 +1400,33 @@ QHeaderView::section {
    </property>
    <property name="text">
     <string>Save Results</string>
+   </property>
+  </action>
+  <action name="menu_analysis_method_frequency_band">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Frequency Band</string>
+   </property>
+  </action>
+  <action name="menu_analysis_method_point_estimate">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Point Estimate</string>
+   </property>
+  </action>
+  <action name="menu_analysis_method_ask_on_new_file">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Ask on new File</string>
    </property>
   </action>
  </widget>
