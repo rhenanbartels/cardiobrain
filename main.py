@@ -12,7 +12,7 @@ os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QTableWidgetItem
+from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem
 
 import numpy
 import scipy
@@ -114,9 +114,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.region_start = None
         self.region_end = None
 
-        # Init analysis method
-        self.analysis_method = None
-
         # Init last opened directory
         self.last_dir = "."
         self.file_name = ""
@@ -209,6 +206,33 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(2, 6, QTableWidgetItem(f"{results['std_abp']:.2f}"))
         self.resultsTable.setItem(3, 6, QTableWidgetItem(f"{results['std_cbfv']:.2f}"))
         self.resultsTable.setItem(4, 6, QTableWidgetItem(f"{int(results['n_windows'])}"))
+
+    def _define_analysis_method(self):
+        if self.menu_analysis_method_ask_on_new_file.isChecked():
+            self._show_analysis_method_dialog()
+            self._update_frequency_panel()
+            return
+
+    def _show_analysis_method_dialog(self):
+        dialog = QMessageBox(self)
+        dialog.setText("Select Analysis to Run")
+        dialog.setWindowTitle("Choose Method | CardioBrain")
+        dialog.setStyleSheet("color:white;background:black")
+        frequency_band_button = dialog.addButton(
+            "Frequency band",
+            QMessageBox.ButtonRole.ActionRole
+        )
+        frequency_band_button._method = "frequency-band"
+        point_estimate_button = dialog.addButton(
+            "Point estimate",
+            QMessageBox.ButtonRole.ActionRole
+        )
+        point_estimate_button._method = "point-estimate"
+        dialog.buttonClicked.connect(self._dialog_button_define_analysis_method)
+        dialog.exec()
+
+    def _dialog_button_define_analysis_method(self, dialog_button):
+        self.analysis_method = dialog_button._method
 
     def _update_info_status(self, msg, status="success"):
         green = (
@@ -353,8 +377,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.analysis_method = None
 
     def _update_frequency_panel(self):
-        # Update frequency panel to point estimate or frequency band method
-        pass
+        index = {"frequency-band": 0, "point-estimate": 1}[self.analysis_method]
+        self.tabAnalysisMethod.setCurrentIndex(index)
 
     def open_file(self):
         self.file_path, _ = QFileDialog.getOpenFileName(
@@ -363,6 +387,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.last_dir,
             "All Files (*);;CSV Files (*.csv);;Text Files (*.txt)",
         )
+        self._define_analysis_method()
         if self.file_path:
             try:
                 time, abp, cbfv = open_data_file(self.file_path)
