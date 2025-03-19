@@ -334,6 +334,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "point-estimate": point_estimate_columns,
         }.get(self.analysis_method, default)
 
+    # TODO: create variable with big dict with config for each method
+    # e.g: {"point-estimate: {"color": (127, 10, 1), "columns": ...}}
+    @property
+    def analysis_method_default_psd_brush(self):
+        default = (127, 127, 127, 100)
+        return {
+            "point-estimate": (127, 127, 255, 200),
+        }.get(self.analysis_method, default)
+
     @property
     def duration(self):
         if self.time is not None:
@@ -676,7 +685,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             vlf=self.vlf_range,
             lf=self.lf_range,
             hf=self.hf_range,
-            label="PSD ((cm/s)²/Hz)"
+            label="PSD ((cm/s)²/Hz)",
+            default_brush=self.analysis_method_default_psd_brush,
+            show_frequency_bands=self.is_frequncy_band_analysis,  # TODO: this can be a config too
         )
         if self.is_point_estimate_analysis:
             self.plot_point_estimate_frequency(
@@ -706,6 +717,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             lf=self.lf_range,
             hf=self.hf_range,
             label="PSD (mmHg²/Hz)",
+            default_brush=self.analysis_method_default_psd_brush,
+            show_frequency_bands=self.is_frequncy_band_analysis,
         )
         if self.is_point_estimate_analysis:
             self.plot_point_estimate_frequency(
@@ -902,7 +915,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._add_frequency_line(axes, x=[self.hf_range[0], self.hf_range[0]], ylim=ylim)
         self._add_frequency_line(axes, x=[self.hf_range[1], self.hf_range[1]], ylim=ylim)
 
-    def plot_psd(self, axes, frequency, psd, vlf, lf, hf, label):
+    def plot_psd(
+        self,
+        axes,
+        frequency,
+        psd,
+        vlf,
+        lf,
+        hf,
+        label,
+        default_brush,
+        show_frequency_bands=True,
+    ):
         self.purge_multiple_axes(axes)
 
         # For aesthetic purpose, we are interpolating and resampling the PSD
@@ -927,37 +951,39 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             interp_frequency,
             interp_psd,
             fillLevel=0.0,
-            brush=(127, 127, 127, 100)
+            brush=default_brush,
         )
-        # VLF
-        axes.plot(
-            interp_frequency[indexes_vlf],
-            interp_psd[indexes_vlf],
-            fillLevel=0.0,
-            brush=(127, 127, 255, 200)
-        )
-        # LF
-        axes.plot(
-            interp_frequency[indexes_lf],
-            interp_psd[indexes_lf],
-            fillLevel=0.0,
-            brush=(178, 127, 255, 200)
-        )
-        # HF
-        axes.plot(
-            interp_frequency[indexes_hf],
-            interp_psd[indexes_hf],
-            fillLevel=0.0,
-            brush=(127, 127, 255, 200)
-        )
-
         axes.setRange(xRange=[0, self.hf_range[-1]])
         axes.setLabel("left", label)
         axes.setLabel("bottom", "Frequency (Hz)")
         axes.showGrid(x=True, y=True, alpha=1.0)
 
-        # Add frequency band lines
-        self._add_frequency_bands_lines(axes)
+        # TODO: Remove this logic from this function
+        if show_frequency_bands:
+            # VLF
+            axes.plot(
+                interp_frequency[indexes_vlf],
+                interp_psd[indexes_vlf],
+                fillLevel=0.0,
+                brush=(127, 127, 255, 200)
+            )
+            # LF
+            axes.plot(
+                interp_frequency[indexes_lf],
+                interp_psd[indexes_lf],
+                fillLevel=0.0,
+                brush=(178, 127, 255, 200)
+            )
+            # HF
+            axes.plot(
+                interp_frequency[indexes_hf],
+                interp_psd[indexes_hf],
+                fillLevel=0.0,
+                brush=(127, 127, 255, 200)
+            )
+
+            # Add frequency band lines
+            self._add_frequency_bands_lines(axes)
 
     def plot_point_estimate_frequency(self, axes, point_estimate_frequency, y_psd_frequency_peak):
         # Add line showing the point estimate frequency
