@@ -45,6 +45,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.showMaximized()
 
+        # Set empty analys method
+        self.analysis_method = None
+
         # Disable axes auto range button
         self.top_axes.hideButtons()
         self.bottom_axes.hideButtons()
@@ -96,6 +99,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditHFLower.editingFinished.connect(self.safe_analyze)
         self.lineEditHFUpper.editingFinished.connect(self.safe_analyze)
 
+        self.lineEditPointEstimateFrequency.editingFinished.connect(self.safe_analyze)
+
         self.coherenceThreshold.editingFinished.connect(self.safe_analyze)
         self.radioButtonApplyCoherence.toggled.connect(self.safe_analyze)
         self.radioButtonSimulatedCoherence.toggled.connect(self.safe_analyze)
@@ -142,7 +147,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setColumnCount(7)
         self.resultsTable.setColumnWidth(0, 170)
         self.resultsTable.setColumnWidth(5, 150)
-        self.resultsTable.setHorizontalHeaderLabels(("", "VLF", "LF", "HF", "", "", ""))
+        self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
         self.resultsTable.setVerticalHeaderLabels(("", "", "", "", "", ""))
 
         self.resultsTable.setItem(0, 0, QTableWidgetItem("Gain"))
@@ -170,6 +175,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(4, 6, QTableWidgetItem("-"))
 
     def _fill_table_results(self, results):
+        # Header
+        self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
+        # Descriptive results
+        self.resultsTable.setItem(0, 6, QTableWidgetItem(f"{results['avg_abp']:.2f}"))
+        self.resultsTable.setItem(1, 6, QTableWidgetItem(f"{results['avg_cbfv']:.2f}"))
+        self.resultsTable.setItem(2, 6, QTableWidgetItem(f"{results['std_abp']:.2f}"))
+        self.resultsTable.setItem(3, 6, QTableWidgetItem(f"{results['std_cbfv']:.2f}"))
+        self.resultsTable.setItem(4, 6, QTableWidgetItem(f"{int(results['n_windows'])}"))
+
+        if self.is_frequncy_band_analysis:
+            self._fill_table_results_frequency_band(results)
+        elif self.is_point_estimate_analysis:
+            self._fill_table_results_point_estimate(results)
+
+    def _fill_table_results_frequency_band(self, results):
         # Gain
         self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['gain_vlf']:.2f}"))
         self.resultsTable.setItem(0, 2, QTableWidgetItem(f"{results['gain_lf']:.2f}"))
@@ -200,12 +220,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['pyy_lf']:.2f}"))
         self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['pyy_hf']:.2f}"))
 
-        # Descriptive results
-        self.resultsTable.setItem(0, 6, QTableWidgetItem(f"{results['avg_abp']:.2f}"))
-        self.resultsTable.setItem(1, 6, QTableWidgetItem(f"{results['avg_cbfv']:.2f}"))
-        self.resultsTable.setItem(2, 6, QTableWidgetItem(f"{results['std_abp']:.2f}"))
-        self.resultsTable.setItem(3, 6, QTableWidgetItem(f"{results['std_cbfv']:.2f}"))
-        self.resultsTable.setItem(4, 6, QTableWidgetItem(f"{int(results['n_windows'])}"))
+    def _fill_table_results_point_estimate(self, results):
+        self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['point_estimate_gain']:.2f}"))
+        self.resultsTable.setItem(1, 1, QTableWidgetItem(f"{results['point_estimate_gain_norm']:.2f}"))
+        self.resultsTable.setItem(2, 1, QTableWidgetItem(f"{results['point_estimate_coherence']:.2f}"))
+        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['point_estimate_phase']:.2f}"))
+        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['point_estimate_abp_psd']:.2f}"))
+        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['point_estimate_cbfv_psd']:.2f}"))
 
     def _define_analysis_method(self):
         if self.menu_analysis_method_ask_on_new_file.isChecked():
@@ -256,6 +277,62 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @property
     def is_point_estimate_analysis(self):
         return self.analysis_method == "point-estimate"
+
+    @property
+    def is_frequncy_band_analysis(self):
+        # When the analysis_method is not set (None) we assume frequency band as default
+        return self.analysis_method in (None, "frequency-band")
+
+    @property
+    def analysis_method_table_labels(self):
+        default = ("", "VLF", "LF", "HF", "", "", "")
+        return {
+            "point-estimate": ("", "", "", "", "", "", ""),
+        }.get(self.analysis_method, default)
+
+    @property
+    def analysis_method_export_columns(self):
+        default = [
+            "gain_vlf",
+            "gain_lf",
+            "gain_hf",
+            "phase_vlf",
+            "phase_lf",
+            "phase_hf",
+            "coherence_vlf",
+            "coherence_lf",
+            "coherence_hf",
+            "gain_vlf_norm",
+            "gain_lf_norm",
+            "gain_hf_norm",
+            "coherence_threshold_applied",
+            "n_windows",
+            "avg_abp",
+            "avg_cbfv",
+            "std_abp",
+            "std_cbfv",
+            "coherence_threshold",
+        ]
+        point_estimate_columns = [
+            "point_estimate_gain",
+            "point_estimate_gain_norm",
+            "point_estimate_phase",
+            "point_estimate_coherence",
+            "point_estimate_frequency",
+            "point_estimate_abp_psd",
+            "point_estimate_cbfv_psd",
+            "coherence_threshold_applied",
+            "n_windows",
+            "avg_abp",
+            "avg_cbfv",
+            "std_abp",
+            "std_cbfv",
+            "coherence_threshold",
+
+        ]
+        return {
+            "point-estimate": point_estimate_columns,
+        }.get(self.analysis_method, default)
 
     @property
     def duration(self):
@@ -377,8 +454,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.analysis_method = None
 
     def _update_frequency_panel(self):
-        index = {"frequency-band": 0, "point-estimate": 1}[self.analysis_method]
+        methods = {"frequency-band": 0, "point-estimate": 1}
+        index = methods[self.analysis_method]
         self.tabAnalysisMethod.setCurrentIndex(index)
+        self.tabAnalysisMethod.setTabEnabled(index, True)
+        [self.tabAnalysisMethod.setTabEnabled(i, False) for i in methods.values() if i != index]
 
     def open_file(self):
         self.file_path, _ = QFileDialog.getOpenFileName(
@@ -387,7 +467,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.last_dir,
             "All Files (*);;CSV Files (*.csv);;Text Files (*.txt)",
         )
-        self._define_analysis_method()
         if self.file_path:
             try:
                 time, abp, cbfv = open_data_file(self.file_path)
@@ -397,6 +476,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # TODO: improve logging and save traceback
                 print(exc)
                 return
+
+            self._define_analysis_method()
 
             self.time = time
             self.abp = abp
@@ -444,13 +525,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
             "point_estimate_frequency": self.analysis_options["point_estimate_frequency"],
         }
-        method = "point-estimate"
-        self.results_pe = calculate_indexes(interp_abp, interp_cbfv, fs, method, options=options)
-        method = "tfa"
-        self.results = calculate_indexes(interp_abp, interp_cbfv, fs, method, options=options)
-        self.results["peak_frequency"] = self.results_pe["peak_frequency"]
-        self.results["peak_pxx"] = self.results_pe["peak_pxx"]
-        self.results["peak_pyy"] = self.results_pe["peak_pyy"]
+        self.results = calculate_indexes(
+            interp_abp,
+            interp_cbfv,
+            fs,
+            self.analysis_method,
+            options=options
+        )
         self._fill_table_results(self.results)
 
         # Update plots
@@ -464,7 +545,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             filter="CSV files (*.csv)",
         )
         if file_path:
-            export_as_csv(file_path, self.results)
+            export_as_csv(file_path, self.results, self.analysis_method_export_columns)
 
     def post_analysis(self):
         self._update_info_status(msg="Ready", status="success")
@@ -600,8 +681,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.is_point_estimate_analysis:
             self.plot_point_estimate_frequency(
                 axes,
-                point_estimate_frequency=self.results["peak_frequency"],
-                y_psd_frequency_peak=self.results["peak_pyy"],
+                point_estimate_frequency=self.results["point_estimate_frequency"],
+                y_psd_frequency_peak=self.results["point_estimate_cbfv_psd"],
             )
 
     def plot_abp(self, axes):
@@ -629,8 +710,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.is_point_estimate_analysis:
             self.plot_point_estimate_frequency(
                 axes,
-                point_estimate_frequency=self.results["peak_frequency"],
-                y_psd_frequency_peak=self.results["peak_pxx"],
+                point_estimate_frequency=self.results["point_estimate_frequency"],
+                y_psd_frequency_peak=self.results["point_estimate_abp_psd"],
             )
 
     def plot_gain(self, axes):

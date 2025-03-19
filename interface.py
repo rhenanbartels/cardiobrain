@@ -784,6 +784,7 @@ class Ui_MainWindow(object):
         self.lineEditLFLower.setText(QCoreApplication.translate("MainWindow", u"0.07", None))
         self.tabAnalysisMethod.setTabText(self.tabAnalysisMethod.indexOf(self.tabFrequencyBand), QCoreApplication.translate("MainWindow", u"Frequency band", None))
         self.label_23.setText(QCoreApplication.translate("MainWindow", u"Point Frequency (Hz):", None))
+        self.lineEditPointEstimateFrequency.setInputMask(QCoreApplication.translate("MainWindow", u"0.00", None))
         self.lineEditPointEstimateFrequency.setText(QCoreApplication.translate("MainWindow", u"0.1", None))
         self.tabAnalysisMethod.setTabText(self.tabAnalysisMethod.indexOf(self.tabPointEstimate), QCoreApplication.translate("MainWindow", u"Point estimate", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u"File", None))

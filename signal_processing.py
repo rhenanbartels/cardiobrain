@@ -241,6 +241,7 @@ def estimate_psd(abp, cbfv, fs, options: dict = None):
         "pyy": abs(pyy),
         "pxy": abs(pxy),
         "gain": abs(gain),
+        "gain_norm": abs(gain) / avg_cbfv * 100,
         "coherence": abs(coherence) ** 2,
         "phase": phase,
         "coherence_threshold": coherence_threshold,
@@ -251,7 +252,7 @@ def estimate_psd(abp, cbfv, fs, options: dict = None):
 
 def calculate_indexes(abp, cbfv, fs, method="tfa", options: dict = None):
     results = estimate_psd(abp, cbfv, fs, options)
-    if method == "tfa":
+    if method == "frequency-band":
         results.update(
             tfa(
                 results["frequency"],
@@ -272,6 +273,7 @@ def calculate_indexes(abp, cbfv, fs, method="tfa", options: dict = None):
                 results["pxx"],
                 results["pyy"],
                 results["gain"],
+                results["gain_norm"],
                 results["phase"],
                 results["coherence"],
                 options["point_estimate_frequency"],
@@ -281,16 +283,17 @@ def calculate_indexes(abp, cbfv, fs, method="tfa", options: dict = None):
     return results
 
 
-def point_estimate(frequency, pxx, pyy, gain, phase, coherence, point_estimate_frequency):
+def point_estimate(frequency, pxx, pyy, gain, gain_norm, phase, coherence, point_estimate_frequency):
     # get closest  existing frequency to 'point_estimate_frequency'
     point_estimate_frequency_index = abs(point_estimate_frequency - frequency).argmin()
     results = {
-        "peak_frequency": frequency[point_estimate_frequency_index],
-        "peak_pxx": pxx[point_estimate_frequency_index],
-        "peak_pyy": pyy[point_estimate_frequency_index],
-        "peak_gain": gain[point_estimate_frequency_index],
-        "peak_phase": phase[point_estimate_frequency_index],
-        "peak_coherence": coherence[point_estimate_frequency_index],
+        "point_estimate_frequency": frequency[point_estimate_frequency_index],
+        "point_estimate_abp_psd": pxx[point_estimate_frequency_index],
+        "point_estimate_cbfv_psd": pyy[point_estimate_frequency_index],
+        "point_estimate_gain": gain[point_estimate_frequency_index],
+        "point_estimate_gain_norm": gain_norm[point_estimate_frequency_index],
+        "point_estimate_phase": phase[point_estimate_frequency_index],
+        "point_estimate_coherence": coherence[point_estimate_frequency_index],
     }
     return results
 
