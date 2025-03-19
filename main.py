@@ -114,6 +114,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.region_start = None
         self.region_end = None
 
+        # Init analysis method
+        self.analysis_method = None
+
         # Init last opened directory
         self.last_dir = "."
         self.file_name = ""
@@ -228,7 +231,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @property
     def is_point_estimate_analysis(self):
-        return self.analysis_options["method"] == "point-estimate"
+        return self.analysis_method == "point-estimate"
 
     @property
     def duration(self):
@@ -291,8 +294,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "window": windows[self.windowComboBox.currentIndex()],
             "coherence_threshold": float(self.coherenceThreshold.text()),
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
-            "method": "point-estimate",
-            "point_estimate_frequency": 0.1,
+            "method": self.analysis_method,
+            "point_estimate_frequency": float(self.lineEditPointEstimateFrequency.text()),
         }
 
     @property
@@ -335,19 +338,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def set_frequency_band_analysis_method(self):
         self.menu_analysis_method_point_estimate.setChecked(False)
         self.menu_analysis_method_ask_on_new_file.setChecked(False)
-        self.analysis_options["method"] = "frequency-band"
+        self.analysis_method = "frequency-band"
         self._update_frequency_panel()
 
     def set_point_estimate_analysis_method(self):
         self.menu_analysis_method_frequency_band.setChecked(False)
         self.menu_analysis_method_ask_on_new_file.setChecked(False)
-        self.analysis_options["method"] = "point-estimate"
+        self.analysis_method = "point-estimate"
         self._update_frequency_panel()
 
     def set_ask_on_new_file_method(self):
         self.menu_analysis_method_frequency_band.setChecked(False)
         self.menu_analysis_method_point_estimate.setChecked(False)
-        self.analysis_options["method"] = None
+        self.analysis_method = None
 
     def _update_frequency_panel(self):
         # Update frequency panel to point estimate or frequency band method
