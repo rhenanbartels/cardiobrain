@@ -99,7 +99,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditHFLower.editingFinished.connect(self.safe_analyze)
         self.lineEditHFUpper.editingFinished.connect(self.safe_analyze)
 
-        self.lineEditPointEstimateFrequency.editingFinished.connect(self.safe_analyze)
+        # Point Frequency
+        self.lineEditPointEstimateFrequency.editingFinished.connect(self.update_line_roi_from_form)
 
         self.coherenceThreshold.editingFinished.connect(self.safe_analyze)
         self.radioButtonApplyCoherence.toggled.connect(self.safe_analyze)
@@ -124,6 +125,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.file_name = ""
 
         # Init plot config variables
+        self.top_line_roi = None
+        self.bottom_line_roi = None
         self.top_roi = None
         self.bottom_roi = None
         self._roi_region = None
@@ -377,6 +380,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return self._roi_region
 
     @property
+    def line_roi_position(self):
+        return float(self.lineEditPointEstimateFrequency.text())
+
+    @property
     def coherence_threshold(self):
         threshold = None
         if not self.radioButtonSimulatedCoherence.isChecked():
@@ -624,6 +631,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.bottom_roi.setRegion(region)
         self.safe_analyze()
 
+    def update_line_roi_from_form(self):
+        point = float(self.lineEditPointEstimateFrequency.text())
+        self.top_line_roi.setPos(point)
+        self.bottom_line_roi.setPos(point)
+        self.safe_analyze()
+
     def _keep_region_boundary(self, region):
         # Do not let area outside signal
         if region[0] < self.region_start:
@@ -650,6 +663,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.top_roi.setRegion(region)
 
         self._update_edit_time_ranges(region)
+
+    def update_top_line_roi(self):
+        self._update_point_frequency_value(self.top_line_roi.getXPos())
+        if self.bottom_line_roi is not None:
+            self.bottom_line_roi.setPos(self.line_roi_position)
+
+    def update_bottom_line_roi(self):
+        self._update_point_frequency_value(self.bottom_line_roi.getXPos())
+
+        if self.top_line_roi is not None:
+            self.top_line_roi.setPos(self.line_roi_position)
 
     def add_roi(self, axes, action):
         roi = CustomLinearRegionItem(self.roi_region, pen=pg.mkPen(width=3.5))
@@ -690,11 +714,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             show_frequency_bands=self.is_frequncy_band_analysis,  # TODO: this can be a config too
         )
         if self.is_point_estimate_analysis:
-            self.plot_point_estimate_frequency(
-                axes,
-                point_estimate_frequency=self.results["point_estimate_frequency"],
-                y_psd_frequency_peak=self.results["point_estimate_cbfv_psd"],
-            )
+            self.bottom_line_roi = self.add_line_roi(axes, self.update_bottom_line_roi)
 
     def plot_abp(self, axes):
         self.plot_time_series(
@@ -721,11 +741,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             show_frequency_bands=self.is_frequncy_band_analysis,
         )
         if self.is_point_estimate_analysis:
-            self.plot_point_estimate_frequency(
-                axes,
-                point_estimate_frequency=self.results["point_estimate_frequency"],
-                y_psd_frequency_peak=self.results["point_estimate_abp_psd"],
-            )
+            self.top_line_roi = self.add_line_roi(axes, self.update_top_line_roi)
 
     def plot_gain(self, axes):
         freq = self.results["frequency"]
@@ -985,13 +1001,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # Add frequency band lines
             self._add_frequency_bands_lines(axes)
 
-    def plot_point_estimate_frequency(self, axes, point_estimate_frequency, y_psd_frequency_peak):
+    def add_line_roi(self, axes, action):
         # Add line showing the point estimate frequency
-        axes.plot(
-            x=[point_estimate_frequency, point_estimate_frequency],
-            y=[0, y_psd_frequency_peak],
-            pen=pg.mkPen("r", width=3)
+        line_roi = pg.InfiniteLine(
+            self.analysis_options["point_estimate_frequency"],
+            pen=pg.mkPen("r", width=3.5),
+            hoverPen=pg.mkPen("w", width=3.5),
+            movable=True,
+            bounds=[0, self.fs / 2.0],
         )
+        axes.addItem(line_roi)
+        line_roi.sigPositionChanged.connect(action)
+        line_roi.sigPositionChangeFinished.connect(self.safe_analyze)
+        return line_roi
+
+    def _update_point_frequency_value(self, pos):
+        self.lineEditPointEstimateFrequency.setText(f"{pos:.3f}")
 
 
 if __name__ == "__main__":
