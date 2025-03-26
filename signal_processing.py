@@ -283,17 +283,22 @@ def calculate_indexes(abp, cbfv, fs, method="tfa", options: dict = None):
     return results
 
 
+def cspline(frequency, values, point_frequency):
+    frequency = frequency[~numpy.isnan(values)]
+    values = values[~numpy.isnan(values)]
+    cs = scipy.interpolate.CubicSpline(frequency, values)
+    return cs(point_frequency)
+
+
 def point_estimate(frequency, pxx, pyy, gain, gain_norm, phase, coherence, point_estimate_frequency):
-    # get closest  existing frequency to 'point_estimate_frequency'
-    point_estimate_frequency_index = abs(point_estimate_frequency - frequency).argmin()
     results = {
-        "point_estimate_frequency": frequency[point_estimate_frequency_index],
-        "point_estimate_abp_psd": pxx[point_estimate_frequency_index],
-        "point_estimate_cbfv_psd": pyy[point_estimate_frequency_index],
-        "point_estimate_gain": gain[point_estimate_frequency_index],
-        "point_estimate_gain_norm": gain_norm[point_estimate_frequency_index],
-        "point_estimate_phase": phase[point_estimate_frequency_index],
-        "point_estimate_coherence": coherence[point_estimate_frequency_index],
+        "point_estimate_frequency": point_estimate_frequency,
+        "point_estimate_abp_psd": cspline(frequency, pxx, point_estimate_frequency),
+        "point_estimate_cbfv_psd": cspline(frequency, pyy, point_estimate_frequency),
+        "point_estimate_gain": cspline(frequency, gain, point_estimate_frequency),
+        "point_estimate_gain_norm": cspline(frequency, gain_norm, point_estimate_frequency),
+        "point_estimate_phase": cspline(frequency, phase, point_estimate_frequency),
+        "point_estimate_coherence": cspline(frequency, coherence, point_estimate_frequency),
     }
     return results
 
