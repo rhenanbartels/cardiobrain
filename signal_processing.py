@@ -134,7 +134,7 @@ def smooth(psd, smooth_factor):
     return psd_filt
 
 
-def tfa(abp, cbfv, fs, options: dict = None):
+def estimate_psd(abp, cbfv, avg_abp, std_abp, avg_cbfv, std_cbfv, fs, options: dict = None):
     # TODO: docstring
     if options is None:
         options = dict()
@@ -176,11 +176,6 @@ def tfa(abp, cbfv, fs, options: dict = None):
         "normalize_abp": False,
     }
     options = {**default_options, **options}
-
-    avg_abp = abp.mean()
-    avg_cbfv = cbfv.mean()
-    std_abp = abp.std()
-    std_cbfv = cbfv.std()
 
     abp = options["detrend"](abp - avg_abp)
     cbfv = options["detrend"](cbfv - avg_cbfv)
@@ -230,6 +225,106 @@ def tfa(abp, cbfv, fs, options: dict = None):
         indexes = numpy.where(phase[numpy.where(frequency < cutoff)[0]] < 0)
         phase[indexes] = numpy.nan
 
+    results = {
+        "coherence_threshold_applied": apply_coherence_threshold,
+        "n_windows": n_windows,
+        "pxx": abs(pxx),
+        "pyy": abs(pyy),
+        "pxy": abs(pxy),
+        "gain": abs(gain),
+        "gain_norm": abs(gain) / avg_cbfv * 100,
+        "coherence": abs(coherence) ** 2,
+        "phase": phase,
+        "coherence_threshold": coherence_threshold,
+        "frequency": frequency,
+    }
+    return results
+
+
+def calculate_indexes(abp, cbfv, interp_abp, interp_cbfv, fs, method="tfa", options: dict = None):
+    avg_abp = abp.mean()
+    avg_cbfv = cbfv.mean()
+    std_abp = abp.std()
+    std_cbfv = cbfv.std()
+
+    results = estimate_psd(
+        interp_abp,
+        interp_cbfv,
+        avg_abp,
+        std_abp,
+        avg_cbfv,
+        std_cbfv,
+        fs,
+        options
+    )
+    results["avg_abp"] = avg_abp
+    results["avg_cbfv"] = avg_cbfv
+    results["std_abp"] = std_abp
+    results["std_cbfv"] = std_cbfv
+    if method == "frequency-band":
+        results.update(
+            tfa(
+                results["frequency"],
+                results["pxx"],
+                results["pyy"],
+                results["gain"],
+                results["phase"],
+                results["coherence"],
+                results["avg_abp"],
+                results["avg_cbfv"],
+                options,
+            )
+        )
+    elif method == "point-estimate":
+        results.update(
+            point_estimate(
+                results["frequency"],
+                results["pxx"],
+                results["pyy"],
+                results["gain"],
+                results["gain_norm"],
+                results["phase"],
+                results["coherence"],
+                options["point_estimate_frequency"],
+            )
+        )
+
+    return results
+
+
+def cspline(frequency, values, point_frequency):
+    frequency = frequency[~numpy.isnan(values)]
+    values = values[~numpy.isnan(values)]
+    cs = scipy.interpolate.CubicSpline(frequency, values)
+    return cs(point_frequency)
+
+
+def point_estimate(frequency, pxx, pyy, gain, gain_norm, phase, coherence, point_estimate_frequency):
+    results = {
+        "point_estimate_frequency": point_estimate_frequency,
+        "point_estimate_abp_psd": cspline(frequency, pxx, point_estimate_frequency),
+        "point_estimate_cbfv_psd": cspline(frequency, pyy, point_estimate_frequency),
+        "point_estimate_gain": cspline(frequency, gain, point_estimate_frequency),
+        "point_estimate_gain_norm": cspline(frequency, gain_norm, point_estimate_frequency),
+        "point_estimate_phase": cspline(frequency, phase, point_estimate_frequency),
+        "point_estimate_coherence": cspline(frequency, coherence, point_estimate_frequency),
+    }
+    return results
+
+
+def tfa(frequency, pxx, pyy, gain, phase, coherence, avg_abp, avg_cbfv, options=None):
+    if options is None:
+        options = dict()
+
+    default_options = {
+        "vlf": (0.02, 0.07),
+        "lf": (0.07, 0.2),
+        "hf": (0.2, 0.5),
+        "normalize_cbfv": False,
+        "normalize_abp": False,
+    }
+    options = {**default_options, **options}
+
     results = frequency_bands_results(
         frequency,
         pxx,
@@ -251,20 +346,6 @@ def tfa(abp, cbfv, fs, options: dict = None):
         results["gain_lf_norm"] = results["gain_lf"] / avg_cbfv * 100
         results["gain_hf_norm"] = results["gain_hf"] / avg_cbfv * 100
 
-    results["coherence_threshold_applied"] = apply_coherence_threshold
-    results["n_windows"] = n_windows
-    results["avg_abp"] = avg_abp
-    results["avg_cbfv"] = avg_cbfv
-    results["std_abp"] = std_abp
-    results["std_cbfv"] = std_cbfv
-    results["pxx"] = abs(pxx)
-    results["pyy"] = abs(pyy)
-    results["pxy"] = abs(pxy)
-    results["gain"] = abs(gain)
-    results["coherence"] = abs(coherence) ** 2
-    results["phase"] = phase
-    results["coherence_threshold"] = coherence_threshold
-    results["frequency"] = frequency
     return results
 
 

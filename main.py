@@ -12,7 +12,7 @@ os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QTableWidgetItem
+from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem
 
 import numpy
 import scipy
@@ -21,11 +21,11 @@ import pyqtgraph as pg
 from export import export_as_csv
 from interface import Ui_MainWindow
 from signal_processing import (
+    calculate_indexes,
     cubic_spline,
     linear_interp,
     open_data_file,
     shift_signal,
-    tfa,
 )
 
 
@@ -45,6 +45,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.showMaximized()
 
+        # Set empty analys method
+        self.analysis_method = None
+
         # Disable axes auto range button
         self.top_axes.hideButtons()
         self.bottom_axes.hideButtons()
@@ -55,6 +58,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # File menu
         self.menu_file_open_action.setShortcut("Ctrl+O")
         self.menu_file_open_action.triggered.connect(self.open_file)
+
+        # Settings menu
+        self.menu_analysis_method_frequency_band.triggered.connect(
+            self.set_frequency_band_analysis_method
+        )
+        self.menu_analysis_method_point_estimate.triggered.connect(
+            self.set_point_estimate_analysis_method
+        )
+        self.menu_analysis_method_ask_on_new_file.triggered.connect(
+            self.set_ask_on_new_file_method
+        )
 
         # Save results menu
         self.menu_save_results_action.setShortcut("Ctrl+S")
@@ -85,6 +99,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditHFLower.editingFinished.connect(self.safe_analyze)
         self.lineEditHFUpper.editingFinished.connect(self.safe_analyze)
 
+        # Point Frequency
+        self.lineEditPointEstimateFrequency.editingFinished.connect(self.update_line_roi_from_form)
+
         self.coherenceThreshold.editingFinished.connect(self.safe_analyze)
         self.radioButtonApplyCoherence.toggled.connect(self.safe_analyze)
         self.radioButtonSimulatedCoherence.toggled.connect(self.safe_analyze)
@@ -108,6 +125,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.file_name = ""
 
         # Init plot config variables
+        self.top_line_roi = None
+        self.bottom_line_roi = None
         self.top_roi = None
         self.bottom_roi = None
         self._roi_region = None
@@ -131,7 +150,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setColumnCount(7)
         self.resultsTable.setColumnWidth(0, 170)
         self.resultsTable.setColumnWidth(5, 150)
-        self.resultsTable.setHorizontalHeaderLabels(("", "VLF", "LF", "HF", "", "", ""))
+        self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
         self.resultsTable.setVerticalHeaderLabels(("", "", "", "", "", ""))
 
         self.resultsTable.setItem(0, 0, QTableWidgetItem("Gain"))
@@ -159,6 +178,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(4, 6, QTableWidgetItem("-"))
 
     def _fill_table_results(self, results):
+        # Header
+        self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
+        # Descriptive results
+        self.resultsTable.setItem(0, 6, QTableWidgetItem(f"{results['avg_abp']:.2f}"))
+        self.resultsTable.setItem(1, 6, QTableWidgetItem(f"{results['avg_cbfv']:.2f}"))
+        self.resultsTable.setItem(2, 6, QTableWidgetItem(f"{results['std_abp']:.2f}"))
+        self.resultsTable.setItem(3, 6, QTableWidgetItem(f"{results['std_cbfv']:.2f}"))
+        self.resultsTable.setItem(4, 6, QTableWidgetItem(f"{int(results['n_windows'])}"))
+
+        if self.is_frequncy_band_analysis:
+            self._fill_table_results_frequency_band(results)
+        elif self.is_point_estimate_analysis:
+            self._fill_table_results_point_estimate(results)
+
+    def _fill_table_results_frequency_band(self, results):
         # Gain
         self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['gain_vlf']:.2f}"))
         self.resultsTable.setItem(0, 2, QTableWidgetItem(f"{results['gain_lf']:.2f}"))
@@ -189,12 +223,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['pyy_lf']:.2f}"))
         self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['pyy_hf']:.2f}"))
 
-        # Descriptive results
-        self.resultsTable.setItem(0, 6, QTableWidgetItem(f"{results['avg_abp']:.2f}"))
-        self.resultsTable.setItem(1, 6, QTableWidgetItem(f"{results['avg_cbfv']:.2f}"))
-        self.resultsTable.setItem(2, 6, QTableWidgetItem(f"{results['std_abp']:.2f}"))
-        self.resultsTable.setItem(3, 6, QTableWidgetItem(f"{results['std_cbfv']:.2f}"))
-        self.resultsTable.setItem(4, 6, QTableWidgetItem(f"{int(results['n_windows'])}"))
+    def _fill_table_results_point_estimate(self, results):
+        self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['point_estimate_gain']:.2f}"))
+        self.resultsTable.setItem(1, 1, QTableWidgetItem(f"{results['point_estimate_gain_norm']:.2f}"))
+        self.resultsTable.setItem(2, 1, QTableWidgetItem(f"{results['point_estimate_coherence']:.2f}"))
+        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['point_estimate_phase']:.2f}"))
+        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['point_estimate_abp_psd']:.2f}"))
+        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['point_estimate_cbfv_psd']:.2f}"))
+
+    def _define_analysis_method(self):
+        if self.menu_analysis_method_ask_on_new_file.isChecked():
+            self._show_analysis_method_dialog()
+            self._update_frequency_panel()
+            return
+
+    def _show_analysis_method_dialog(self):
+        dialog = QMessageBox(self)
+        dialog.setText("Select Analysis to Run")
+        dialog.setWindowTitle("Choose Method | CardioBrain")
+        dialog.setStyleSheet("color:white;background:black")
+        frequency_band_button = dialog.addButton(
+            "Frequency band",
+            QMessageBox.ButtonRole.ActionRole
+        )
+        frequency_band_button._method = "frequency-band"
+        point_estimate_button = dialog.addButton(
+            "Point estimate",
+            QMessageBox.ButtonRole.ActionRole
+        )
+        point_estimate_button._method = "point-estimate"
+        dialog.buttonClicked.connect(self._dialog_button_define_analysis_method)
+        dialog.exec()
+
+    def _dialog_button_define_analysis_method(self, dialog_button):
+        self.analysis_method = dialog_button._method
 
     def _update_info_status(self, msg, status="success"):
         green = (
@@ -214,6 +276,75 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _toggle_coherence_threshold(self):
         self.coherenceThreshold.setEnabled(not self.radioButtonSimulatedCoherence.isChecked())
+
+    @property
+    def is_point_estimate_analysis(self):
+        return self.analysis_method == "point-estimate"
+
+    @property
+    def is_frequncy_band_analysis(self):
+        # When the analysis_method is not set (None) we assume frequency band as default
+        return self.analysis_method in (None, "frequency-band")
+
+    @property
+    def analysis_method_table_labels(self):
+        default = ("", "VLF", "LF", "HF", "", "", "")
+        return {
+            "point-estimate": ("", "", "", "", "", "", ""),
+        }.get(self.analysis_method, default)
+
+    @property
+    def analysis_method_export_columns(self):
+        default = [
+            "gain_vlf",
+            "gain_lf",
+            "gain_hf",
+            "phase_vlf",
+            "phase_lf",
+            "phase_hf",
+            "coherence_vlf",
+            "coherence_lf",
+            "coherence_hf",
+            "gain_vlf_norm",
+            "gain_lf_norm",
+            "gain_hf_norm",
+            "coherence_threshold_applied",
+            "n_windows",
+            "avg_abp",
+            "avg_cbfv",
+            "std_abp",
+            "std_cbfv",
+            "coherence_threshold",
+        ]
+        point_estimate_columns = [
+            "point_estimate_gain",
+            "point_estimate_gain_norm",
+            "point_estimate_phase",
+            "point_estimate_coherence",
+            "point_estimate_frequency",
+            "point_estimate_abp_psd",
+            "point_estimate_cbfv_psd",
+            "coherence_threshold_applied",
+            "n_windows",
+            "avg_abp",
+            "avg_cbfv",
+            "std_abp",
+            "std_cbfv",
+            "coherence_threshold",
+
+        ]
+        return {
+            "point-estimate": point_estimate_columns,
+        }.get(self.analysis_method, default)
+
+    # TODO: create variable with big dict with config for each method
+    # e.g: {"point-estimate: {"color": (127, 10, 1), "columns": ...}}
+    @property
+    def analysis_method_default_psd_brush(self):
+        default = (127, 127, 127, 100)
+        return {
+            "point-estimate": (127, 127, 255, 200),
+        }.get(self.analysis_method, default)
 
     @property
     def duration(self):
@@ -249,6 +380,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return self._roi_region
 
     @property
+    def line_roi_position(self):
+        return float(self.lineEditPointEstimateFrequency.text())
+
+    @property
     def coherence_threshold(self):
         threshold = None
         if not self.radioButtonSimulatedCoherence.isChecked():
@@ -276,6 +411,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "window": windows[self.windowComboBox.currentIndex()],
             "coherence_threshold": float(self.coherenceThreshold.text()),
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
+            "method": self.analysis_method,
+            "point_estimate_frequency": float(self.lineEditPointEstimateFrequency.text()),
         }
 
     @property
@@ -315,6 +452,30 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEditStartTimeAxes.setText(f"{region[0]:.2f}")
         self.lineEditEndTimeAxes.setText(f"{region[1]:.2f}")
 
+    def set_frequency_band_analysis_method(self):
+        self.menu_analysis_method_point_estimate.setChecked(False)
+        self.menu_analysis_method_ask_on_new_file.setChecked(False)
+        self.analysis_method = "frequency-band"
+        self._update_frequency_panel()
+
+    def set_point_estimate_analysis_method(self):
+        self.menu_analysis_method_frequency_band.setChecked(False)
+        self.menu_analysis_method_ask_on_new_file.setChecked(False)
+        self.analysis_method = "point-estimate"
+        self._update_frequency_panel()
+
+    def set_ask_on_new_file_method(self):
+        self.menu_analysis_method_frequency_band.setChecked(False)
+        self.menu_analysis_method_point_estimate.setChecked(False)
+        self.analysis_method = None
+
+    def _update_frequency_panel(self):
+        methods = {"frequency-band": 0, "point-estimate": 1}
+        index = methods[self.analysis_method]
+        self.tabAnalysisMethod.setCurrentIndex(index)
+        self.tabAnalysisMethod.setTabEnabled(index, True)
+        [self.tabAnalysisMethod.setTabEnabled(i, False) for i in methods.values() if i != index]
+
     def open_file(self):
         self.file_path, _ = QFileDialog.getOpenFileName(
             self,
@@ -331,6 +492,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 # TODO: improve logging and save traceback
                 print(exc)
                 return
+
+            self._define_analysis_method()
 
             self.time = time
             self.abp = abp
@@ -376,8 +539,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "nfft": self.analysis_options["segment_size"],  # TODO: allow use of zero padding
             "coherence_threshold": self.coherence_threshold,
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
+            "point_estimate_frequency": self.analysis_options["point_estimate_frequency"],
         }
-        self.results = tfa(interp_abp, interp_cbfv, fs, options=options)
+        self.results = calculate_indexes(
+            self.abp_region,
+            self.cbfv_region,
+            interp_abp,
+            interp_cbfv,
+            fs,
+            self.analysis_method,
+            options=options
+        )
         self._fill_table_results(self.results)
 
         # Update plots
@@ -391,7 +563,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             filter="CSV files (*.csv)",
         )
         if file_path:
-            export_as_csv(file_path, self.results)
+            export_as_csv(file_path, self.results, self.analysis_method_export_columns)
 
     def post_analysis(self):
         self._update_info_status(msg="Ready", status="success")
@@ -461,6 +633,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.bottom_roi.setRegion(region)
         self.safe_analyze()
 
+    def update_line_roi_from_form(self):
+        point = float(self.lineEditPointEstimateFrequency.text())
+        self.top_line_roi.setPos(point)
+        self.bottom_line_roi.setPos(point)
+        self.safe_analyze()
+
     def _keep_region_boundary(self, region):
         # Do not let area outside signal
         if region[0] < self.region_start:
@@ -487,6 +665,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.top_roi.setRegion(region)
 
         self._update_edit_time_ranges(region)
+
+    def update_top_line_roi(self):
+        self._update_point_frequency_value(self.top_line_roi.getXPos())
+        if self.bottom_line_roi is not None:
+            self.bottom_line_roi.setPos(self.line_roi_position)
+
+    def update_bottom_line_roi(self):
+        self._update_point_frequency_value(self.bottom_line_roi.getXPos())
+
+        if self.top_line_roi is not None:
+            self.top_line_roi.setPos(self.line_roi_position)
 
     def add_roi(self, axes, action):
         roi = CustomLinearRegionItem(self.roi_region, pen=pg.mkPen(width=3.5))
@@ -522,8 +711,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             vlf=self.vlf_range,
             lf=self.lf_range,
             hf=self.hf_range,
-            label="PSD ((cm/s)²/Hz)"
+            label="PSD ((cm/s)²/Hz)",
+            default_brush=self.analysis_method_default_psd_brush,
+            show_frequency_bands=self.is_frequncy_band_analysis,  # TODO: this can be a config too
         )
+        if self.is_point_estimate_analysis:
+            self.bottom_line_roi = self.add_line_roi(axes, self.update_bottom_line_roi)
 
     def plot_abp(self, axes):
         self.plot_time_series(
@@ -546,7 +739,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             lf=self.lf_range,
             hf=self.hf_range,
             label="PSD (mmHg²/Hz)",
+            default_brush=self.analysis_method_default_psd_brush,
+            show_frequency_bands=self.is_frequncy_band_analysis,
         )
+        if self.is_point_estimate_analysis:
+            self.top_line_roi = self.add_line_roi(axes, self.update_top_line_roi)
 
     def plot_gain(self, axes):
         freq = self.results["frequency"]
@@ -736,7 +933,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._add_frequency_line(axes, x=[self.hf_range[0], self.hf_range[0]], ylim=ylim)
         self._add_frequency_line(axes, x=[self.hf_range[1], self.hf_range[1]], ylim=ylim)
 
-    def plot_psd(self, axes, frequency, psd, vlf, lf, hf, label):
+    def plot_psd(
+        self,
+        axes,
+        frequency,
+        psd,
+        vlf,
+        lf,
+        hf,
+        label,
+        default_brush,
+        show_frequency_bands=True,
+    ):
         self.purge_multiple_axes(axes)
 
         # For aesthetic purpose, we are interpolating and resampling the PSD
@@ -761,37 +969,56 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             interp_frequency,
             interp_psd,
             fillLevel=0.0,
-            brush=(127, 127, 127, 100)
+            brush=default_brush,
         )
-        # VLF
-        axes.plot(
-            interp_frequency[indexes_vlf],
-            interp_psd[indexes_vlf],
-            fillLevel=0.0,
-            brush=(127, 127, 255, 200)
-        )
-        # LF
-        axes.plot(
-            interp_frequency[indexes_lf],
-            interp_psd[indexes_lf],
-            fillLevel=0.0,
-            brush=(178, 127, 255, 200)
-        )
-        # HF
-        axes.plot(
-            interp_frequency[indexes_hf],
-            interp_psd[indexes_hf],
-            fillLevel=0.0,
-            brush=(127, 127, 255, 200)
-        )
-
         axes.setRange(xRange=[0, self.hf_range[-1]])
         axes.setLabel("left", label)
         axes.setLabel("bottom", "Frequency (Hz)")
         axes.showGrid(x=True, y=True, alpha=1.0)
 
-        # Add frequency band lines
-        self._add_frequency_bands_lines(axes)
+        # TODO: Remove this logic from this function
+        if show_frequency_bands:
+            # VLF
+            axes.plot(
+                interp_frequency[indexes_vlf],
+                interp_psd[indexes_vlf],
+                fillLevel=0.0,
+                brush=(127, 127, 255, 200)
+            )
+            # LF
+            axes.plot(
+                interp_frequency[indexes_lf],
+                interp_psd[indexes_lf],
+                fillLevel=0.0,
+                brush=(178, 127, 255, 200)
+            )
+            # HF
+            axes.plot(
+                interp_frequency[indexes_hf],
+                interp_psd[indexes_hf],
+                fillLevel=0.0,
+                brush=(127, 127, 255, 200)
+            )
+
+            # Add frequency band lines
+            self._add_frequency_bands_lines(axes)
+
+    def add_line_roi(self, axes, action):
+        # Add line showing the point estimate frequency
+        line_roi = pg.InfiniteLine(
+            self.analysis_options["point_estimate_frequency"],
+            pen=pg.mkPen("r", width=3.5),
+            hoverPen=pg.mkPen("w", width=3.5),
+            movable=True,
+            bounds=[0, self.fs / 2.0],
+        )
+        axes.addItem(line_roi)
+        line_roi.sigPositionChanged.connect(action)
+        line_roi.sigPositionChangeFinished.connect(self.safe_analyze)
+        return line_roi
+
+    def _update_point_frequency_value(self, pos):
+        self.lineEditPointEstimateFrequency.setText(f"{pos:.3f}")
 
 
 if __name__ == "__main__":
