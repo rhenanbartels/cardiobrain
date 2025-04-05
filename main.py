@@ -542,6 +542,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "point_estimate_frequency": self.analysis_options["point_estimate_frequency"],
         }
         self.results = calculate_indexes(
+            self.abp_region,
+            self.cbfv_region,
             interp_abp,
             interp_cbfv,
             fs,

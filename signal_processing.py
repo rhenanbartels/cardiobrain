@@ -134,7 +134,7 @@ def smooth(psd, smooth_factor):
     return psd_filt
 
 
-def estimate_psd(abp, cbfv, fs, options: dict = None):
+def estimate_psd(abp, cbfv, avg_abp, std_abp, avg_cbfv, std_cbfv, fs, options: dict = None):
     # TODO: docstring
     if options is None:
         options = dict()
@@ -176,11 +176,6 @@ def estimate_psd(abp, cbfv, fs, options: dict = None):
         "normalize_abp": False,
     }
     options = {**default_options, **options}
-
-    avg_abp = abp.mean()
-    avg_cbfv = cbfv.mean()
-    std_abp = abp.std()
-    std_cbfv = cbfv.std()
 
     abp = options["detrend"](abp - avg_abp)
     cbfv = options["detrend"](cbfv - avg_cbfv)
@@ -233,10 +228,6 @@ def estimate_psd(abp, cbfv, fs, options: dict = None):
     results = {
         "coherence_threshold_applied": apply_coherence_threshold,
         "n_windows": n_windows,
-        "avg_abp": avg_abp,
-        "avg_cbfv": avg_cbfv,
-        "std_abp": std_abp,
-        "std_cbfv": std_cbfv,
         "pxx": abs(pxx),
         "pyy": abs(pyy),
         "pxy": abs(pxy),
@@ -250,8 +241,26 @@ def estimate_psd(abp, cbfv, fs, options: dict = None):
     return results
 
 
-def calculate_indexes(abp, cbfv, fs, method="tfa", options: dict = None):
-    results = estimate_psd(abp, cbfv, fs, options)
+def calculate_indexes(abp, cbfv, interp_abp, interp_cbfv, fs, method="tfa", options: dict = None):
+    avg_abp = abp.mean()
+    avg_cbfv = cbfv.mean()
+    std_abp = abp.std()
+    std_cbfv = cbfv.std()
+
+    results = estimate_psd(
+        interp_abp,
+        interp_cbfv,
+        avg_abp,
+        std_abp,
+        avg_cbfv,
+        std_cbfv,
+        fs,
+        options
+    )
+    results["avg_abp"] = avg_abp
+    results["avg_cbfv"] = avg_cbfv
+    results["std_abp"] = std_abp
+    results["std_cbfv"] = std_cbfv
     if method == "frequency-band":
         results.update(
             tfa(
