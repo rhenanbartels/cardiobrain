@@ -38,6 +38,7 @@ class Ui_MainWindow(object):
 "    background-color: black;\n"
 "}\n"
 "\n"
+"\n"
 "QLabel {\n"
 "	color: rgb(152, 152, 152);\n"
 "}\n"
@@ -457,6 +458,9 @@ class Ui_MainWindow(object):
         self.tabAnalysisMethod.setObjectName(u"tabAnalysisMethod")
         self.tabFrequencyBand = QWidget()
         self.tabFrequencyBand.setObjectName(u"tabFrequencyBand")
+        self.tabFrequencyBand.setStyleSheet(u"tabFrequencyBand {\n"
+"	background-color: black;\n"
+"}")
         self.horizontalLayout_4 = QHBoxLayout(self.tabFrequencyBand)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.frame_8 = QFrame(self.tabFrequencyBand)
@@ -564,6 +568,9 @@ class Ui_MainWindow(object):
         self.tabAnalysisMethod.addTab(self.tabFrequencyBand, "")
         self.tabPointEstimate = QWidget()
         self.tabPointEstimate.setObjectName(u"tabPointEstimate")
+        self.tabPointEstimate.setStyleSheet(u"tabPointEstimate{\n"
+"	background-color: black;\n"
+"}")
         self.horizontalLayout = QHBoxLayout(self.tabPointEstimate)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.frame_13 = QFrame(self.tabPointEstimate)

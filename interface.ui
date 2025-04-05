@@ -30,6 +30,7 @@
     background-color: black;
 }
 
+
 QLabel {
 	color: rgb(152, 152, 152);
 }
@@ -1000,6 +1001,11 @@ QHeaderView::section {
           <number>0</number>
          </property>
          <widget class="QWidget" name="tabFrequencyBand">
+          <property name="styleSheet">
+           <string notr="true">tabFrequencyBand {
+	background-color: black;
+}</string>
+          </property>
           <attribute name="title">
            <string>Frequency band</string>
           </attribute>
@@ -1241,6 +1247,11 @@ QHeaderView::section {
           </layout>
          </widget>
          <widget class="QWidget" name="tabPointEstimate">
+          <property name="styleSheet">
+           <string notr="true">tabPointEstimate{
+	background-color: black;
+}</string>
+          </property>
           <attribute name="title">
            <string>Point estimate</string>
           </attribute>
