@@ -45,6 +45,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.showMaximized()
 
+        self.menubar.setNativeMenuBar(False)
+
         # Set empty analys method
         self.analysis_method = None
 
