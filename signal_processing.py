@@ -54,7 +54,7 @@ def band_phase(phase, indexes):
 
 
 def band_coherence(coherence, indexes):
-    return numpy.nanmean(abs(coherence[indexes]) ** 2)
+    return numpy.nanmean(coherence[indexes])
 
 
 def band_power(psd, indexes, freq_resolution):
