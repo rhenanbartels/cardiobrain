@@ -88,24 +88,24 @@ def frequency_bands_results(frequency, pxx, pyy, gain, phase, coherence, options
 def welch(x, y, segment_size, overlap, window_fun, fs, nfft):
     n_windows = int((len(x) - segment_size) / (segment_size - overlap)) + 1
 
-    frequency = numpy.arange(0, fs, fs / nfft)
+    frequency = numpy.arange(0, fs, fs / segment_size)
     _, pxx = scipy.signal.welch(
         x,
         fs=fs,
-        window=window_fun(segment_size),
+        window=window_fun(segment_size, sym=False),
         nperseg=segment_size,
         noverlap=overlap,
-        nfft=None,
+        nfft=nfft,
         detrend=False,
         return_onesided=False,
     )
     _, pyy = scipy.signal.welch(
         y,
         fs=fs,
-        window=window_fun(segment_size),
+        window=window_fun(segment_size, sym=False),
         nperseg=segment_size,
         noverlap=overlap,
-        nfft=None,
+        nfft=nfft,
         detrend=False,
         return_onesided=False,
     )
@@ -114,10 +114,10 @@ def welch(x, y, segment_size, overlap, window_fun, fs, nfft):
         x,
         y,
         fs=fs,
-        window=window_fun(segment_size),
+        window=window_fun(segment_size, sym=False),
         nperseg=segment_size,
         noverlap=overlap,
-        nfft=None,
+        nfft=nfft,
         detrend=False,
         return_onesided=False,
     )
@@ -134,7 +134,18 @@ def smooth(psd, smooth_factor):
     return psd_filt
 
 
-def estimate_psd(abp, cbfv, avg_abp, std_abp, avg_cbfv, std_cbfv, fs, options: dict = None):
+def estimate_psd(
+    time,
+    abp,
+    cbfv,
+    interp_method,
+    avg_abp,
+    std_abp,
+    avg_cbfv,
+    std_cbfv,
+    fs,
+    options: dict = None,
+):
     # TODO: docstring
     if options is None:
         options = dict()
@@ -180,6 +191,9 @@ def estimate_psd(abp, cbfv, avg_abp, std_abp, avg_cbfv, std_cbfv, fs, options: d
     abp = options["detrend"](abp - avg_abp)
     cbfv = options["detrend"](cbfv - avg_cbfv)
 
+    interp_abp = interp_method(time, abp, fs)
+    interp_cbfv = interp_method(time, cbfv, fs)
+
     if options["normalize_cbfv"]:
         cbfv = (cbfv / avg_cbfv) * 100
 
@@ -187,8 +201,8 @@ def estimate_psd(abp, cbfv, avg_abp, std_abp, avg_cbfv, std_cbfv, fs, options: d
         abp = (abp / avg_abp) * 100
 
     frequency, pxx, pyy, pxy, n_windows, = welch(
-        x=abp,
-        y=cbfv,
+        x=interp_abp,
+        y=interp_cbfv,
         window_fun=options.get("window"),
         segment_size=options.get("segment_size"),
         overlap=options.get("overlap"),
@@ -197,9 +211,10 @@ def estimate_psd(abp, cbfv, avg_abp, std_abp, avg_cbfv, std_cbfv, fs, options: d
     )
 
     # Smoothing
-    pxx = smooth(pxx, options.get("smooth_factor"))
-    pyy = smooth(pyy, options.get("smooth_factor"))
-    pxy = smooth(pxy, options.get("smooth_factor"))
+    if options.get("smooth_psd", False):
+        pxx = smooth(pxx, options.get("smooth_factor"))
+        pyy = smooth(pyy, options.get("smooth_factor"))
+        pxy = smooth(pxy, options.get("smooth_factor"))
 
     gain = pxy / pxx
     coherence = pxy / (numpy.sqrt(pxx * pyy))
@@ -241,15 +256,17 @@ def estimate_psd(abp, cbfv, avg_abp, std_abp, avg_cbfv, std_cbfv, fs, options: d
     return results
 
 
-def calculate_indexes(abp, cbfv, interp_abp, interp_cbfv, fs, method="tfa", options: dict = None):
+def calculate_indexes(time, abp, cbfv, fs, method="tfa", interp_method=None, options: dict = None):
     avg_abp = abp.mean()
     avg_cbfv = cbfv.mean()
     std_abp = abp.std()
     std_cbfv = cbfv.std()
 
     results = estimate_psd(
-        interp_abp,
-        interp_cbfv,
+        time,
+        abp,
+        cbfv,
+        interp_method,
         avg_abp,
         std_abp,
         avg_cbfv,

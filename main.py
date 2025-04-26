@@ -109,6 +109,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.radioButtonSimulatedCoherence.toggled.connect(self.safe_analyze)
         self.radioButtonSimulatedCoherence.toggled.connect(self._toggle_coherence_threshold)
         self.radioButtonShowMarkers.toggled.connect(self.change_both_axes)
+        self.radioButtonSmoothPSD.toggled.connect(self.safe_analyze)
 
         # Shift CBFV
         self.lineEditShiftCBFV.setText("0.00")
@@ -413,6 +414,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "window": windows[self.windowComboBox.currentIndex()],
             "coherence_threshold": float(self.coherenceThreshold.text()),
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
+            "smooth_psd": self.radioButtonSmoothPSD.isChecked(),
             "method": self.analysis_method,
             "point_estimate_frequency": float(self.lineEditPointEstimateFrequency.text()),
         }
@@ -529,8 +531,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return
 
         fs = self.analysis_options["resampling_frequency"]
-        interp_abp = self.analysis_options["interp_method"](self.time_region, self.abp_region, fs)
-        interp_cbfv = self.analysis_options["interp_method"](self.time_region, self.cbfv_region, fs)
         options = {
             "vlf": self.vlf_range,
             "lf": self.lf_range,
@@ -538,19 +538,20 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "segment_size": self.analysis_options["segment_size"],
             "overlap": self.analysis_options["overlap_size"],
             "window": self.analysis_options["window"],
-            "nfft": self.analysis_options["segment_size"],  # TODO: allow use of zero padding
+            "nfft": self.analysis_options["nfft"],
             "coherence_threshold": self.coherence_threshold,
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
             "point_estimate_frequency": self.analysis_options["point_estimate_frequency"],
+            "smooth_psd": self.analysis_options["smooth_psd"],
         }
         self.results = calculate_indexes(
+            self.time_region,
             self.abp_region,
             self.cbfv_region,
-            interp_abp,
-            interp_cbfv,
             fs,
             self.analysis_method,
-            options=options
+            interp_method=self.analysis_options["interp_method"],
+            options=options,
         )
         self._fill_table_results(self.results)
 
