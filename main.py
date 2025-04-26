@@ -92,7 +92,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resamplingFrequency.editingFinished.connect(self.safe_analyze)
         self.segmentSize.editingFinished.connect(self.safe_analyze)
         self.overlapSize.editingFinished.connect(self.safe_analyze)
-        self.zeroPadding.editingFinished.connect(self.safe_analyze)
+        self.nfft.editingFinished.connect(self.safe_analyze)
 
         self.lineEditVLFLower.editingFinished.connect(self.safe_analyze)
         self.lineEditVLFUpper.editingFinished.connect(self.safe_analyze)
@@ -409,7 +409,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "resampling_frequency": int(self.resamplingFrequency.text()),
             "segment_size": int(self.segmentSize.text()),
             "overlap_size": int(self.overlapSize.text()),
-            "zero_padding": int(self.zeroPadding.text()),
+            "nfft": int(self.nfft.text()),
             "window": windows[self.windowComboBox.currentIndex()],
             "coherence_threshold": float(self.coherenceThreshold.text()),
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),

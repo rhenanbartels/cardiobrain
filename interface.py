@@ -242,12 +242,12 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.label_20, 3, 0, 1, 1)
 
-        self.zeroPadding = QLineEdit(self.frame_7)
-        self.zeroPadding.setObjectName(u"zeroPadding")
-        self.zeroPadding.setMaximumSize(QSize(40, 30))
-        self.zeroPadding.setAlignment(Qt.AlignCenter)
+        self.nfft = QLineEdit(self.frame_7)
+        self.nfft.setObjectName(u"nfft")
+        self.nfft.setMaximumSize(QSize(60, 30))
+        self.nfft.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout.addWidget(self.zeroPadding, 4, 1, 1, 1)
+        self.gridLayout.addWidget(self.nfft, 4, 1, 1, 1)
 
         self.label_11 = QLabel(self.frame_7)
         self.label_11.setObjectName(u"label_11")
@@ -724,8 +724,8 @@ class Ui_MainWindow(object):
         self.radioButtonApplyCoherence.setText("")
         self.statusLabel.setText(QCoreApplication.translate("MainWindow", u"Ready", None))
         self.label_20.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Overlap Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
-        self.zeroPadding.setInputMask(QCoreApplication.translate("MainWindow", u"000", None))
-        self.zeroPadding.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.nfft.setInputMask(QCoreApplication.translate("MainWindow", u"0000", None))
+        self.nfft.setText(QCoreApplication.translate("MainWindow", u"1024", None))
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Segment Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Zero Padding (n):", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Interp. Method:", None))
