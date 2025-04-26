@@ -183,10 +183,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Header
         self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
         # Descriptive results
-        self.resultsTable.setItem(0, 6, QTableWidgetItem(f"{results['avg_abp']:.2f}"))
-        self.resultsTable.setItem(1, 6, QTableWidgetItem(f"{results['avg_cbfv']:.2f}"))
-        self.resultsTable.setItem(2, 6, QTableWidgetItem(f"{results['std_abp']:.2f}"))
-        self.resultsTable.setItem(3, 6, QTableWidgetItem(f"{results['std_cbfv']:.2f}"))
+        self.resultsTable.setItem(0, 6, QTableWidgetItem(f"{results['avg_abp']:.3f}"))
+        self.resultsTable.setItem(1, 6, QTableWidgetItem(f"{results['avg_cbfv']:.3f}"))
+        self.resultsTable.setItem(2, 6, QTableWidgetItem(f"{results['std_abp']:.3f}"))
+        self.resultsTable.setItem(3, 6, QTableWidgetItem(f"{results['std_cbfv']:.3f}"))
         self.resultsTable.setItem(4, 6, QTableWidgetItem(f"{int(results['n_windows'])}"))
 
         if self.is_frequncy_band_analysis:
@@ -196,42 +196,42 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _fill_table_results_frequency_band(self, results):
         # Gain
-        self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['gain_vlf']:.2f}"))
-        self.resultsTable.setItem(0, 2, QTableWidgetItem(f"{results['gain_lf']:.2f}"))
-        self.resultsTable.setItem(0, 3, QTableWidgetItem(f"{results['gain_hf']:.2f}"))
+        self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['gain_vlf']:.3f}"))
+        self.resultsTable.setItem(0, 2, QTableWidgetItem(f"{results['gain_lf']:.3f}"))
+        self.resultsTable.setItem(0, 3, QTableWidgetItem(f"{results['gain_hf']:.3f}"))
 
         # Gain norm
-        self.resultsTable.setItem(1, 1, QTableWidgetItem(f"{results['gain_vlf_norm']:.2f}"))
-        self.resultsTable.setItem(1, 2, QTableWidgetItem(f"{results['gain_lf_norm']:.2f}"))
-        self.resultsTable.setItem(1, 3, QTableWidgetItem(f"{results['gain_hf_norm']:.2f}"))
+        self.resultsTable.setItem(1, 1, QTableWidgetItem(f"{results['gain_vlf_norm']:.3f}"))
+        self.resultsTable.setItem(1, 2, QTableWidgetItem(f"{results['gain_lf_norm']:.3f}"))
+        self.resultsTable.setItem(1, 3, QTableWidgetItem(f"{results['gain_hf_norm']:.3f}"))
 
         # Coherence (|Coh|^2)
-        self.resultsTable.setItem(2, 1, QTableWidgetItem(f"{results['coherence_vlf']:.2f}"))
-        self.resultsTable.setItem(2, 2, QTableWidgetItem(f"{results['coherence_lf']:.2f}"))
-        self.resultsTable.setItem(2, 3, QTableWidgetItem(f"{results['coherence_hf']:.2f}"))
+        self.resultsTable.setItem(2, 1, QTableWidgetItem(f"{results['coherence_vlf']:.3f}"))
+        self.resultsTable.setItem(2, 2, QTableWidgetItem(f"{results['coherence_lf']:.3f}"))
+        self.resultsTable.setItem(2, 3, QTableWidgetItem(f"{results['coherence_hf']:.3f}"))
 
         # Phase
-        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['phase_vlf']:.2f}"))
-        self.resultsTable.setItem(3, 2, QTableWidgetItem(f"{results['phase_lf']:.2f}"))
-        self.resultsTable.setItem(3, 3, QTableWidgetItem(f"{results['phase_hf']:.2f}"))
+        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['phase_vlf']:.3f}"))
+        self.resultsTable.setItem(3, 2, QTableWidgetItem(f"{results['phase_lf']:.3f}"))
+        self.resultsTable.setItem(3, 3, QTableWidgetItem(f"{results['phase_hf']:.3f}"))
 
         # Power ABP
-        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['pxx_vlf']:.2f}"))
-        self.resultsTable.setItem(4, 2, QTableWidgetItem(f"{results['pxx_lf']:.2f}"))
-        self.resultsTable.setItem(4, 3, QTableWidgetItem(f"{results['pxx_hf']:.2f}"))
+        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['pxx_vlf']:.3f}"))
+        self.resultsTable.setItem(4, 2, QTableWidgetItem(f"{results['pxx_lf']:.3f}"))
+        self.resultsTable.setItem(4, 3, QTableWidgetItem(f"{results['pxx_hf']:.3f}"))
 
         # Power CBFV
-        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['pyy_vlf']:.2f}"))
-        self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['pyy_lf']:.2f}"))
-        self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['pyy_hf']:.2f}"))
+        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['pyy_vlf']:.3f}"))
+        self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['pyy_lf']:.3f}"))
+        self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['pyy_hf']:.3f}"))
 
     def _fill_table_results_point_estimate(self, results):
-        self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['point_estimate_gain']:.2f}"))
-        self.resultsTable.setItem(1, 1, QTableWidgetItem(f"{results['point_estimate_gain_norm']:.2f}"))
-        self.resultsTable.setItem(2, 1, QTableWidgetItem(f"{results['point_estimate_coherence']:.2f}"))
-        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['point_estimate_phase']:.2f}"))
-        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['point_estimate_abp_psd']:.2f}"))
-        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['point_estimate_cbfv_psd']:.2f}"))
+        self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['point_estimate_gain']:.3f}"))
+        self.resultsTable.setItem(1, 1, QTableWidgetItem(f"{results['point_estimate_gain_norm']:.3f}"))
+        self.resultsTable.setItem(2, 1, QTableWidgetItem(f"{results['point_estimate_coherence']:.3f}"))
+        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['point_estimate_phase']:.3f}"))
+        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['point_estimate_abp_psd']:.3f}"))
+        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['point_estimate_cbfv_psd']:.3f}"))
 
     def _define_analysis_method(self):
         if self.menu_analysis_method_ask_on_new_file.isChecked():
