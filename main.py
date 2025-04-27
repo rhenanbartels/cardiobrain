@@ -24,6 +24,7 @@ from signal_processing import (
     calculate_indexes,
     cubic_spline,
     linear_interp,
+    none_interp,
     open_data_file,
     shift_signal,
 )
@@ -281,6 +282,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.coherenceThreshold.setEnabled(not self.radioButtonSimulatedCoherence.isChecked())
 
     @property
+    def fs(self):
+        if self.interpMethodComboBox.currentText() == "None":
+            return 1.0 / numpy.diff(self.time).mean()
+        else:
+            return self.analysis_options["resampling_frequency"]
+
+    @property
     def is_point_estimate_analysis(self):
         return self.analysis_method == "point-estimate"
 
@@ -502,7 +510,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.time = time
             self.abp = abp
             self.cbfv = cbfv
-            self.fs = round(1.0 / time[1] - time[0])
 
             self._save_last_dir(self.file_path)
 
@@ -530,7 +537,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if self.time is None:
             return
 
-        fs = self.analysis_options["resampling_frequency"]
         options = {
             "vlf": self.vlf_range,
             "lf": self.lf_range,
@@ -547,7 +553,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.time_region,
             self.abp_region,
             self.cbfv_region,
-            fs,
+            self.fs,
             self.analysis_method,
             interp_method=self.analysis_options["interp_method"],
             options=options,
@@ -1021,6 +1027,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _update_point_frequency_value(self, pos):
         self.lineEditPointEstimateFrequency.setText(f"{pos:.3f}")
+
+    def toggle_resampling_frequency(self):
+        if self.interpMethodComboBox.currentText() == "None":
+            self.resamplingFrequency.setEnabled(False)
+            self.resamplingFrequency.setStyleSheet("background:grey")
+        else:
+            self.resamplingFrequency.setEnabled(True)
+            self.resamplingFrequency.setStyleSheet("background:white")
 
 
 if __name__ == "__main__":
