@@ -85,7 +85,7 @@ def frequency_bands_results(frequency, pxx, pyy, gain, phase, coherence, options
     }
 
 
-def welch(x, y, segment_size, overlap, window_fun, fs, nfft):
+def welch(x, y, segment_size, overlap, window_fun, fs):
     n_windows = int((len(x) - segment_size) / (segment_size - overlap)) + 1
 
     frequency = numpy.arange(0, fs, fs / segment_size)
@@ -95,7 +95,7 @@ def welch(x, y, segment_size, overlap, window_fun, fs, nfft):
         window=window_fun(segment_size, sym=False),
         nperseg=segment_size,
         noverlap=overlap,
-        nfft=nfft,
+        nfft=segment_size,
         detrend=False,
         return_onesided=False,
     )
@@ -105,7 +105,7 @@ def welch(x, y, segment_size, overlap, window_fun, fs, nfft):
         window=window_fun(segment_size, sym=False),
         nperseg=segment_size,
         noverlap=overlap,
-        nfft=nfft,
+        nfft=segment_size,
         detrend=False,
         return_onesided=False,
     )
@@ -117,7 +117,7 @@ def welch(x, y, segment_size, overlap, window_fun, fs, nfft):
         window=window_fun(segment_size, sym=False),
         nperseg=segment_size,
         noverlap=overlap,
-        nfft=nfft,
+        nfft=segment_size,
         detrend=False,
         return_onesided=False,
     )
@@ -171,7 +171,6 @@ def estimate_psd(
         "vlf": (0.02, 0.07),
         "lf": (0.07, 0.2),
         "hf": (0.2, 0.5),
-        "nfft": 1024,
         "detrend": lambda x: x - numpy.mean(x),
         "smooth_factor": 3,
         "coherence_threshold": None,
@@ -207,7 +206,6 @@ def estimate_psd(
         segment_size=options.get("segment_size"),
         overlap=options.get("overlap"),
         fs=fs,
-        nfft=options.get("nfft"),
     )
 
     # Smoothing

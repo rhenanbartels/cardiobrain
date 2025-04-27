@@ -87,12 +87,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Analysis options
         # comboboxes
         self.interpMethodComboBox.currentIndexChanged.connect(self.safe_analyze)
+        self.interpMethodComboBox.currentIndexChanged.connect(self.toggle_resampling_frequency)
         self.windowComboBox.currentIndexChanged.connect(self.safe_analyze)
         # textfields
         self.resamplingFrequency.editingFinished.connect(self.safe_analyze)
         self.segmentSize.editingFinished.connect(self.safe_analyze)
         self.overlapSize.editingFinished.connect(self.safe_analyze)
-        self.nfft.editingFinished.connect(self.safe_analyze)
 
         self.lineEditVLFLower.editingFinished.connect(self.safe_analyze)
         self.lineEditVLFUpper.editingFinished.connect(self.safe_analyze)
@@ -399,6 +399,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         interp_methods = {
             0: linear_interp,
             1: cubic_spline,
+            2: none_interp,
         }
         windows = {
             0: scipy.signal.windows.hann,
@@ -410,7 +411,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "resampling_frequency": int(self.resamplingFrequency.text()),
             "segment_size": int(self.segmentSize.text()),
             "overlap_size": int(self.overlapSize.text()),
-            "nfft": int(self.nfft.text()),
             "window": windows[self.windowComboBox.currentIndex()],
             "coherence_threshold": float(self.coherenceThreshold.text()),
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
@@ -538,7 +538,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "segment_size": self.analysis_options["segment_size"],
             "overlap": self.analysis_options["overlap_size"],
             "window": self.analysis_options["window"],
-            "nfft": self.analysis_options["nfft"],
             "coherence_threshold": self.coherence_threshold,
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
             "point_estimate_frequency": self.analysis_options["point_estimate_frequency"],
