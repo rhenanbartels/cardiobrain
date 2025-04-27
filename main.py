@@ -405,9 +405,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @property
     def analysis_options(self):
         interp_methods = {
-            0: linear_interp,
-            1: cubic_spline,
-            2: none_interp,
+            0: none_interp,
+            1: linear_interp,
+            2: cubic_spline,
         }
         windows = {
             0: scipy.signal.windows.hann,

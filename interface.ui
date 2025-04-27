@@ -474,6 +474,11 @@ QHeaderView::section {
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
             </property>
+            <property name="styleSheet">
+             <string notr="true">#resamplingFrequency{
+  background-color:grey;
+}</string>
+            </property>
             <property name="inputMask">
              <string>00</string>
             </property>
@@ -556,17 +561,17 @@ QHeaderView::section {
             </property>
             <item>
              <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Linear</string>
              </property>
             </item>
             <item>
              <property name="text">
               <string>Cubic spline</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>None</string>
              </property>
             </item>
            </widget>

@@ -269,6 +269,9 @@ class Ui_MainWindow(object):
         self.resamplingFrequency.setObjectName(u"resamplingFrequency")
         self.resamplingFrequency.setMaximumSize(QSize(40, 30))
         self.resamplingFrequency.setLayoutDirection(Qt.LeftToRight)
+        self.resamplingFrequency.setStyleSheet(u"#resamplingFrequency{\n"
+"  background-color:grey;\n"
+"}")
         self.resamplingFrequency.setAlignment(Qt.AlignCenter)
         self.resamplingFrequency.setReadOnly(True)
 
@@ -748,9 +751,9 @@ class Ui_MainWindow(object):
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Window:", None))
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Segment Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
         self.label_24.setText(QCoreApplication.translate("MainWindow", u"Smooth PSD:", None))
-        self.interpMethodComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Linear", None))
-        self.interpMethodComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Cubic spline", None))
-        self.interpMethodComboBox.setItemText(2, QCoreApplication.translate("MainWindow", u"None", None))
+        self.interpMethodComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"None", None))
+        self.interpMethodComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Linear", None))
+        self.interpMethodComboBox.setItemText(2, QCoreApplication.translate("MainWindow", u"Cubic spline", None))
 
         self.radioButtonSmoothPSD.setText("")
         self.overlapSize.setInputMask("")
