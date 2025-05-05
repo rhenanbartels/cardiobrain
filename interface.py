@@ -121,7 +121,9 @@ class Ui_MainWindow(object):
         self.lineEditFileName = QLineEdit(self.frame_6)
         self.lineEditFileName.setObjectName(u"lineEditFileName")
         self.lineEditFileName.setEnabled(False)
-        self.lineEditFileName.setAlignment(Qt.AlignCenter)
+        self.lineEditFileName.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
+        self.lineEditFileName.setDragEnabled(False)
+        self.lineEditFileName.setReadOnly(False)
 
         self.horizontalLayout_2.addWidget(self.lineEditFileName)
 
@@ -269,11 +271,9 @@ class Ui_MainWindow(object):
         self.resamplingFrequency.setObjectName(u"resamplingFrequency")
         self.resamplingFrequency.setMaximumSize(QSize(40, 30))
         self.resamplingFrequency.setLayoutDirection(Qt.LeftToRight)
-        self.resamplingFrequency.setStyleSheet(u"#resamplingFrequency{\n"
-"  background-color:grey;\n"
-"}")
+        self.resamplingFrequency.setStyleSheet(u"")
         self.resamplingFrequency.setAlignment(Qt.AlignCenter)
-        self.resamplingFrequency.setReadOnly(True)
+        self.resamplingFrequency.setReadOnly(False)
 
         self.gridLayout.addWidget(self.resamplingFrequency, 1, 1, 1, 1)
 
@@ -305,7 +305,6 @@ class Ui_MainWindow(object):
         self.interpMethodComboBox = QComboBox(self.frame_7)
         self.interpMethodComboBox.addItem("")
         self.interpMethodComboBox.addItem("")
-        self.interpMethodComboBox.addItem("")
         self.interpMethodComboBox.setObjectName(u"interpMethodComboBox")
         self.interpMethodComboBox.setMinimumSize(QSize(116, 30))
 
@@ -323,6 +322,7 @@ class Ui_MainWindow(object):
 "  margin-bottom:12px;\n"
 "}\n"
 "")
+        self.radioButtonSmoothPSD.setChecked(True)
 
         self.gridLayout.addWidget(self.radioButtonSmoothPSD, 5, 1, 1, 1)
 
@@ -751,9 +751,8 @@ class Ui_MainWindow(object):
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Window:", None))
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Segment Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
         self.label_24.setText(QCoreApplication.translate("MainWindow", u"Smooth PSD:", None))
-        self.interpMethodComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"None", None))
+        self.interpMethodComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Cubic spline", None))
         self.interpMethodComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Linear", None))
-        self.interpMethodComboBox.setItemText(2, QCoreApplication.translate("MainWindow", u"Cubic spline", None))
 
         self.radioButtonSmoothPSD.setText("")
         self.overlapSize.setInputMask("")

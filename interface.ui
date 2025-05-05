@@ -136,7 +136,13 @@ QHeaderView::section {
              <bool>false</bool>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            <property name="dragEnabled">
+             <bool>false</bool>
+            </property>
+            <property name="readOnly">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -475,9 +481,7 @@ QHeaderView::section {
              <enum>Qt::LeftToRight</enum>
             </property>
             <property name="styleSheet">
-             <string notr="true">#resamplingFrequency{
-  background-color:grey;
-}</string>
+             <string notr="true"/>
             </property>
             <property name="inputMask">
              <string>00</string>
@@ -489,7 +493,7 @@ QHeaderView::section {
              <set>Qt::AlignCenter</set>
             </property>
             <property name="readOnly">
-             <bool>true</bool>
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -561,17 +565,12 @@ QHeaderView::section {
             </property>
             <item>
              <property name="text">
-              <string>None</string>
+              <string>Cubic spline</string>
              </property>
             </item>
             <item>
              <property name="text">
               <string>Linear</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Cubic spline</string>
              </property>
             </item>
            </widget>
@@ -599,6 +598,9 @@ QHeaderView::section {
             </property>
             <property name="text">
              <string/>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>

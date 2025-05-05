@@ -375,10 +375,6 @@ def cubic_spline(time, signal, fs):
     return cs(interp_time)
 
 
-def none_interp(time, signal, fs):
-    return signal
-
-
 def _create_interp_time(time, fs):
     time_resolution = 1 / float(fs)
     return numpy.arange(time[0], time[-1] + time_resolution, time_resolution)

@@ -24,7 +24,6 @@ from signal_processing import (
     calculate_indexes,
     cubic_spline,
     linear_interp,
-    none_interp,
     open_data_file,
     shift_signal,
 )
@@ -405,9 +404,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @property
     def analysis_options(self):
         interp_methods = {
-            0: none_interp,
+            0: cubic_spline,
             1: linear_interp,
-            2: cubic_spline,
         }
         windows = {
             0: scipy.signal.windows.hann,
@@ -458,6 +456,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def _set_file_name(self, file_path):
         file_name = os.path.basename(file_path)
         self.lineEditFileName.setText(file_name)
+        self.lineEditFileName.setCursorPosition(0)
         return file_name
 
     def _update_edit_time_ranges(self, region):
