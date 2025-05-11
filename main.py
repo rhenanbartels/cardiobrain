@@ -126,6 +126,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Init last opened directory
         self.last_dir = "."
+        self.last_results_dir = None
         self.file_name = ""
 
         # Init plot config variables
@@ -461,6 +462,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _save_last_dir(self, file_name):
         self.last_dir = os.path.dirname(file_name)
+        if self.last_results_dir is None:
+            self._save_last_results_dir(self.last_dir)
+
+    def _save_last_results_dir(self, results_file_name):
+        self.last_results_dir = os.path.dirname(results_file_name)
 
     def _set_file_name(self, file_path):
         file_name = os.path.basename(file_path)
@@ -575,13 +581,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         file_path, _ = QFileDialog.getSaveFileName(
             self,
             caption="Save results",
-            dir=os.path.join(self.last_dir, self.save_file_name(ext="csv")),
+            dir=os.path.join(self.last_results_dir, self.save_file_name(ext="csv")),
             filter="CSV files (*.csv)",
         )
         if file_path:
             results = deepcopy(self.results)
             results["filename"] = self.file_name
             export_as_csv(file_path, results, self.analysis_method_export_columns)
+            self._save_last_results_dir(file_path)
 
     def post_analysis(self):
         self._update_info_status(msg="Ready", status="success")
