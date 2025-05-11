@@ -76,12 +76,12 @@ def frequency_bands_results(frequency, pxx, pyy, gain, phase, coherence, options
         "coherence_vlf": band_coherence(coherence, indexes_vlf),
         "coherence_lf": band_coherence(coherence, indexes_lf),
         "coherence_hf": band_coherence(coherence, indexes_hf),
-        "pxx_vlf": band_power(pxx, indexes_vlf, frequency[1]),
-        "pxx_lf": band_power(pxx, indexes_lf, frequency[1]),
-        "pxx_hf": band_power(pxx, indexes_hf, frequency[1]),
-        "pyy_vlf": band_power(pyy, indexes_vlf, frequency[1]),
-        "pyy_lf": band_power(pyy, indexes_lf, frequency[1]),
-        "pyy_hf": band_power(pyy, indexes_hf, frequency[1]),
+        "psd_abp_vlf": band_power(pxx, indexes_vlf, frequency[1]),
+        "psd_abp_lf": band_power(pxx, indexes_lf, frequency[1]),
+        "psd_abp_hf": band_power(pxx, indexes_hf, frequency[1]),
+        "psd_cbfv_vlf": band_power(pyy, indexes_vlf, frequency[1]),
+        "psd_cbfv_lf": band_power(pyy, indexes_lf, frequency[1]),
+        "psd_cbfv_hf": band_power(pyy, indexes_hf, frequency[1]),
     }
 
 

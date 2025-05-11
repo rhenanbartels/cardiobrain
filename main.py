@@ -217,14 +217,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(3, 3, QTableWidgetItem(f"{results['phase_hf']:.3f}"))
 
         # Power ABP
-        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['pxx_vlf']:.3f}"))
-        self.resultsTable.setItem(4, 2, QTableWidgetItem(f"{results['pxx_lf']:.3f}"))
-        self.resultsTable.setItem(4, 3, QTableWidgetItem(f"{results['pxx_hf']:.3f}"))
+        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['psd_abp_vlf']:.3f}"))
+        self.resultsTable.setItem(4, 2, QTableWidgetItem(f"{results['psd_abp_lf']:.3f}"))
+        self.resultsTable.setItem(4, 3, QTableWidgetItem(f"{results['psd_abp_hf']:.3f}"))
 
         # Power CBFV
-        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['pyy_vlf']:.3f}"))
-        self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['pyy_lf']:.3f}"))
-        self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['pyy_hf']:.3f}"))
+        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['psd_cbfv_vlf']:.3f}"))
+        self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['psd_cbfv_lf']:.3f}"))
+        self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['psd_cbfv_hf']:.3f}"))
 
     def _fill_table_results_point_estimate(self, results):
         self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['point_estimate_gain']:.3f}"))
@@ -318,6 +318,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "gain_vlf_norm",
             "gain_lf_norm",
             "gain_hf_norm",
+            "psd_abp_vlf",
+            "psd_abp_lf",
+            "psd_abp_hf",
+            "psd_cbfv_vlf",
+            "psd_cbfv_lf",
+            "psd_cbfv_hf",
             "coherence_threshold_applied",
             "n_windows",
             "avg_abp",
