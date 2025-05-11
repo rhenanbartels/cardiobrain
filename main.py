@@ -1,6 +1,7 @@
 import os
 import sys
 import traceback
+from copy import deepcopy
 from functools import partial
 from pathlib import Path
 
@@ -306,6 +307,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     @property
     def analysis_method_export_columns(self):
         default = [
+            "filename",
             "gain_vlf",
             "gain_lf",
             "gain_hf",
@@ -333,6 +335,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "coherence_threshold",
         ]
         point_estimate_columns = [
+            "filename",
             "point_estimate_gain",
             "point_estimate_gain_norm",
             "point_estimate_phase",
@@ -576,7 +579,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             filter="CSV files (*.csv)",
         )
         if file_path:
-            export_as_csv(file_path, self.results, self.analysis_method_export_columns)
+            results = deepcopy(self.results)
+            results["filename"] = self.file_name
+            export_as_csv(file_path, results, self.analysis_method_export_columns)
 
     def post_analysis(self):
         self._update_info_status(msg="Ready", status="success")

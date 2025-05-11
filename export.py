@@ -1,9 +1,13 @@
 import csv
+from pathlib import Path
 
 
 def export_as_csv(file_path, results, columns):
-    with open(file_path, "w") as fobj:
+    file_path = Path(file_path)
+    file_exists = file_path.exists()
+    with open(file_path, "a") as fobj:
         w = csv.DictWriter(fobj, columns)
-        w.writeheader()
+        if not file_exists:
+            w.writeheader()
         w.writerow({c: results[c] for c in columns})
 
