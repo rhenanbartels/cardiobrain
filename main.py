@@ -19,6 +19,7 @@ import numpy
 import scipy
 import pyqtgraph as pg
 
+from components.toggle_button import ToggleButton
 from export import export_as_csv
 from interface import Ui_MainWindow
 from signal_processing import (
