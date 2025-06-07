@@ -159,17 +159,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
         self.resultsTable.setVerticalHeaderLabels(("", "", "", "", "", ""))
 
-        self.resultsTable.setItem(0, 0, QTableWidgetItem("Gain"))
-        self.resultsTable.setItem(1, 0, QTableWidgetItem("Gain norm"))
+        self.resultsTable.setItem(0, 0, QTableWidgetItem("Gain (cm.s\u207B\u00B9.mmHg\u207B\u00B9)"))
+        self.resultsTable.setItem(1, 0, QTableWidgetItem("Gain norm (%.mmHg\u207B\u00B9)"))
         self.resultsTable.setItem(2, 0, QTableWidgetItem(u"|Coh|\u00B2"))
         self.resultsTable.setItem(3, 0, QTableWidgetItem(u"Phase (deg)"))
         self.resultsTable.setItem(4, 0, QTableWidgetItem(u"Power ABP (mmHg\u00B2)"))
-        self.resultsTable.setItem(5, 0, QTableWidgetItem(u"Power CBFV ((cm/s)\u00B2)"))
+        self.resultsTable.setItem(5, 0, QTableWidgetItem(u"Power CBFV (cm\u00B2.s\u207B\u00B2)"))
 
         self.resultsTable.setItem(0, 5, QTableWidgetItem("Avg. ABP (mmHg)"))
-        self.resultsTable.setItem(1, 5, QTableWidgetItem("Avg. CBFV (cm/s)"))
+        self.resultsTable.setItem(1, 5, QTableWidgetItem("Avg. CBFV (cm.s\u207B\u00B9)"))
         self.resultsTable.setItem(2, 5, QTableWidgetItem("Std. ABP (mmHg)"))
-        self.resultsTable.setItem(3, 5, QTableWidgetItem("Std. CBFV (cm/s)"))
+        self.resultsTable.setItem(3, 5, QTableWidgetItem("Std. CBFV (cm.s\u207B\u00B9)"))
         self.resultsTable.setItem(4, 5, QTableWidgetItem("# Windows"))
 
     def _set_empty_table(self):
