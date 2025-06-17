@@ -523,7 +523,7 @@ QHeaderView::section {
              <string/>
             </property>
             <property name="text">
-             <string>512</string>
+             <string>250</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -548,7 +548,7 @@ QHeaderView::section {
              <string>00</string>
             </property>
             <property name="text">
-             <string>10</string>
+             <string>5</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -579,7 +579,7 @@ QHeaderView::section {
              <string/>
             </property>
             <property name="text">
-             <string>1024</string>
+             <string>500</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
