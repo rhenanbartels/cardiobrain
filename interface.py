@@ -751,8 +751,8 @@ class Ui_MainWindow(object):
 
         self.label_11.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Segment Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
         self.label_20.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Overlap Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
-        self.interpMethodComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Cubic spline", None))
-        self.interpMethodComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Linear", None))
+        self.interpMethodComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Linear", None))
+        self.interpMethodComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Cubic spline", None))
 
         self.label_24.setText(QCoreApplication.translate("MainWindow", u"Smooth PSD:", None))
         self.segmentSize.setInputMask("")

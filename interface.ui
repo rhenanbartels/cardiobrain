@@ -527,12 +527,12 @@ QHeaderView::section {
             </property>
             <item>
              <property name="text">
-              <string>Cubic spline</string>
+              <string>Linear</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Linear</string>
+              <string>Cubic spline</string>
              </property>
             </item>
            </widget>
