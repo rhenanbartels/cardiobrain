@@ -208,11 +208,9 @@ def estimate_psd(
         fs=fs,
     )
 
-    # Smoothing
-    if options.get("smooth_psd", False):
-        pxx = smooth(pxx, options.get("smooth_factor"))
-        pyy = smooth(pyy, options.get("smooth_factor"))
-        pxy = smooth(pxy, options.get("smooth_factor"))
+    pxx = smooth(pxx, options.get("smooth_factor"))
+    pyy = smooth(pyy, options.get("smooth_factor"))
+    pxy = smooth(pxy, options.get("smooth_factor"))
 
     gain = pxy / pxx
     coherence = pxy / (numpy.sqrt(pxx * pyy))

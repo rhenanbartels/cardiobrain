@@ -111,7 +111,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.radioButtonSimulatedCoherence.toggled.connect(self.safe_analyze)
         self.radioButtonSimulatedCoherence.toggled.connect(self._toggle_coherence_threshold)
         self.radioButtonShowMarkers.toggled.connect(self.change_both_axes)
-        self.radioButtonSmoothPSD.toggled.connect(self.safe_analyze)
 
         # Shift CBFV
         self.lineEditShiftCBFV.setText("0.00")
@@ -431,7 +430,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "window": windows[self.windowComboBox.currentIndex()],
             "coherence_threshold": float(self.coherenceThreshold.text()),
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
-            "smooth_psd": self.radioButtonSmoothPSD.isChecked(),
             "method": self.analysis_method,
             "point_estimate_frequency": float(self.lineEditPointEstimateFrequency.text()),
         }
@@ -562,7 +560,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "coherence_threshold": self.coherence_threshold,
             "apply_coherence_threshold": self.radioButtonApplyCoherence.isChecked(),
             "point_estimate_frequency": self.analysis_options["point_estimate_frequency"],
-            "smooth_psd": self.analysis_options["smooth_psd"],
         }
         self.results = calculate_indexes(
             self.time_region,

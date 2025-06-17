@@ -121,10 +121,11 @@ class Ui_MainWindow(object):
 
         self.lineEditFileName = QLineEdit(self.frame_6)
         self.lineEditFileName.setObjectName(u"lineEditFileName")
-        self.lineEditFileName.setEnabled(False)
+        self.lineEditFileName.setEnabled(True)
+        self.lineEditFileName.setMinimumSize(QSize(0, 30))
         self.lineEditFileName.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
         self.lineEditFileName.setDragEnabled(False)
-        self.lineEditFileName.setReadOnly(False)
+        self.lineEditFileName.setReadOnly(True)
 
         self.horizontalLayout_2.addWidget(self.lineEditFileName)
 
@@ -244,12 +245,50 @@ class Ui_MainWindow(object):
         self.frame_7.setFrameShadow(QFrame.Raised)
         self.gridLayout = QGridLayout(self.frame_7)
         self.gridLayout.setObjectName(u"gridLayout")
+        self.interpMethodComboBox = QComboBox(self.frame_7)
+        self.interpMethodComboBox.addItem("")
+        self.interpMethodComboBox.addItem("")
+        self.interpMethodComboBox.setObjectName(u"interpMethodComboBox")
+        self.interpMethodComboBox.setMinimumSize(QSize(116, 30))
+
+        self.gridLayout.addWidget(self.interpMethodComboBox, 0, 1, 1, 1)
+
+        self.label_3 = QLabel(self.frame_7)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setMinimumSize(QSize(181, 0))
+        self.label_3.setMaximumSize(QSize(160, 16777215))
+        self.label_3.setFont(font1)
+
+        self.gridLayout.addWidget(self.label_3, 1, 0, 1, 1)
+
         self.label_2 = QLabel(self.frame_7)
         self.label_2.setObjectName(u"label_2")
         self.label_2.setMaximumSize(QSize(16777215, 120))
         self.label_2.setFont(font1)
 
         self.gridLayout.addWidget(self.label_2, 0, 0, 1, 1)
+
+        self.label_11 = QLabel(self.frame_7)
+        self.label_11.setObjectName(u"label_11")
+        self.label_11.setFont(font1)
+
+        self.gridLayout.addWidget(self.label_11, 2, 0, 1, 1)
+
+        self.label_5 = QLabel(self.frame_7)
+        self.label_5.setObjectName(u"label_5")
+        self.label_5.setMaximumSize(QSize(16777215, 120))
+        self.label_5.setFont(font1)
+
+        self.gridLayout.addWidget(self.label_5, 4, 0, 1, 1)
+
+        self.overlapSize = QLineEdit(self.frame_7)
+        self.overlapSize.setObjectName(u"overlapSize")
+        self.overlapSize.setMinimumSize(QSize(61, 0))
+        self.overlapSize.setMaximumSize(QSize(40, 30))
+        self.overlapSize.setLayoutDirection(Qt.LeftToRight)
+        self.overlapSize.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout.addWidget(self.overlapSize, 3, 1, 1, 1)
 
         self.resamplingFrequency = QLineEdit(self.frame_7)
         self.resamplingFrequency.setObjectName(u"resamplingFrequency")
@@ -261,12 +300,14 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.resamplingFrequency, 1, 1, 1, 1)
 
-        self.label_5 = QLabel(self.frame_7)
-        self.label_5.setObjectName(u"label_5")
-        self.label_5.setMaximumSize(QSize(16777215, 120))
-        self.label_5.setFont(font1)
+        self.segmentSize = QLineEdit(self.frame_7)
+        self.segmentSize.setObjectName(u"segmentSize")
+        self.segmentSize.setMinimumSize(QSize(61, 0))
+        self.segmentSize.setMaximumSize(QSize(40, 30))
+        self.segmentSize.setLayoutDirection(Qt.LeftToRight)
+        self.segmentSize.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout.addWidget(self.label_5, 4, 0, 1, 1)
+        self.gridLayout.addWidget(self.segmentSize, 2, 1, 1, 1)
 
         self.windowComboBox = QComboBox(self.frame_7)
         self.windowComboBox.addItem("")
@@ -277,73 +318,11 @@ class Ui_MainWindow(object):
 
         self.gridLayout.addWidget(self.windowComboBox, 4, 1, 1, 1)
 
-        self.label_11 = QLabel(self.frame_7)
-        self.label_11.setObjectName(u"label_11")
-        self.label_11.setFont(font1)
-
-        self.gridLayout.addWidget(self.label_11, 2, 0, 1, 1)
-
         self.label_20 = QLabel(self.frame_7)
         self.label_20.setObjectName(u"label_20")
         self.label_20.setFont(font1)
 
         self.gridLayout.addWidget(self.label_20, 3, 0, 1, 1)
-
-        self.interpMethodComboBox = QComboBox(self.frame_7)
-        self.interpMethodComboBox.addItem("")
-        self.interpMethodComboBox.addItem("")
-        self.interpMethodComboBox.setObjectName(u"interpMethodComboBox")
-        self.interpMethodComboBox.setMinimumSize(QSize(116, 30))
-
-        self.gridLayout.addWidget(self.interpMethodComboBox, 0, 1, 1, 1)
-
-        self.label_24 = QLabel(self.frame_7)
-        self.label_24.setObjectName(u"label_24")
-        self.label_24.setFont(font1)
-
-        self.gridLayout.addWidget(self.label_24, 5, 0, 1, 1)
-
-        self.segmentSize = QLineEdit(self.frame_7)
-        self.segmentSize.setObjectName(u"segmentSize")
-        self.segmentSize.setMinimumSize(QSize(61, 0))
-        self.segmentSize.setMaximumSize(QSize(40, 30))
-        self.segmentSize.setLayoutDirection(Qt.LeftToRight)
-        self.segmentSize.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout.addWidget(self.segmentSize, 2, 1, 1, 1)
-
-        self.label_3 = QLabel(self.frame_7)
-        self.label_3.setObjectName(u"label_3")
-        self.label_3.setMinimumSize(QSize(181, 0))
-        self.label_3.setMaximumSize(QSize(160, 16777215))
-        self.label_3.setFont(font1)
-
-        self.gridLayout.addWidget(self.label_3, 1, 0, 1, 1)
-
-        self.overlapSize = QLineEdit(self.frame_7)
-        self.overlapSize.setObjectName(u"overlapSize")
-        self.overlapSize.setMinimumSize(QSize(61, 0))
-        self.overlapSize.setMaximumSize(QSize(40, 30))
-        self.overlapSize.setLayoutDirection(Qt.LeftToRight)
-        self.overlapSize.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout.addWidget(self.overlapSize, 3, 1, 1, 1)
-
-        self.radioButtonSmoothPSD = ToggleButton(self.frame_7)
-        self.radioButtonSmoothPSD.setObjectName(u"radioButtonSmoothPSD")
-        self.radioButtonSmoothPSD.setMaximumSize(QSize(60, 30))
-        font2 = QFont()
-        font2.setPointSize(11)
-        self.radioButtonSmoothPSD.setFont(font2)
-        self.radioButtonSmoothPSD.setStyleSheet(u"#radioButtonSmoothPSD{\n"
-"	margin-top: 15px;\n"
-"   padding-left:12px;\n"
-"  margin-bottom:12px;\n"
-"}\n"
-"")
-        self.radioButtonSmoothPSD.setChecked(True)
-
-        self.gridLayout.addWidget(self.radioButtonSmoothPSD, 5, 1, 1, 1)
 
 
         self.gridLayout_5.addWidget(self.frame_7, 1, 0, 1, 1)
@@ -610,9 +589,9 @@ class Ui_MainWindow(object):
         self.lineEditPointEstimateFrequency.setObjectName(u"lineEditPointEstimateFrequency")
         self.lineEditPointEstimateFrequency.setMinimumSize(QSize(0, 30))
         self.lineEditPointEstimateFrequency.setMaximumSize(QSize(50, 16777215))
-        font3 = QFont()
-        font3.setBold(False)
-        self.lineEditPointEstimateFrequency.setFont(font3)
+        font2 = QFont()
+        font2.setBold(False)
+        self.lineEditPointEstimateFrequency.setFont(font2)
         self.lineEditPointEstimateFrequency.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_5.addWidget(self.lineEditPointEstimateFrequency)
@@ -741,26 +720,24 @@ class Ui_MainWindow(object):
         self.label_15.setText(QCoreApplication.translate("MainWindow", u"Apply threshold:", None))
         self.radioButtonApplyCoherence.setText("")
         self.statusLabel.setText(QCoreApplication.translate("MainWindow", u"Ready", None))
+        self.interpMethodComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Linear", None))
+        self.interpMethodComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Cubic spline", None))
+
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Resampling Freq. <span style=\" vertical-align:sub;\">(Hz)</span>:</p></body></html>", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"Interp. Method:", None))
+        self.label_11.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Segment Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
+        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Window:", None))
+        self.overlapSize.setInputMask("")
+        self.overlapSize.setText(QCoreApplication.translate("MainWindow", u"512", None))
         self.resamplingFrequency.setInputMask(QCoreApplication.translate("MainWindow", u"00", None))
         self.resamplingFrequency.setText(QCoreApplication.translate("MainWindow", u"10", None))
-        self.label_5.setText(QCoreApplication.translate("MainWindow", u"Window:", None))
+        self.segmentSize.setInputMask("")
+        self.segmentSize.setText(QCoreApplication.translate("MainWindow", u"1024", None))
         self.windowComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Hanning", None))
         self.windowComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Hamming", None))
         self.windowComboBox.setItemText(2, QCoreApplication.translate("MainWindow", u"Rectangular", None))
 
-        self.label_11.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Segment Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
         self.label_20.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Overlap Size <span style=\" vertical-align:sub;\">(n)</span>:</p></body></html>", None))
-        self.interpMethodComboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Linear", None))
-        self.interpMethodComboBox.setItemText(1, QCoreApplication.translate("MainWindow", u"Cubic spline", None))
-
-        self.label_24.setText(QCoreApplication.translate("MainWindow", u"Smooth PSD:", None))
-        self.segmentSize.setInputMask("")
-        self.segmentSize.setText(QCoreApplication.translate("MainWindow", u"1024", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Resampling Freq. <span style=\" vertical-align:sub;\">(Hz)</span>:</p></body></html>", None))
-        self.overlapSize.setInputMask("")
-        self.overlapSize.setText(QCoreApplication.translate("MainWindow", u"512", None))
-        self.radioButtonSmoothPSD.setText("")
         self.lineEditShiftCBFV.setInputMask("")
         self.lineEditShiftCBFV.setText("")
         self.label_22.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>Shift CBFV<span style=\" vertical-align:sub;\">(s)</span>:</p></body></html>", None))
