@@ -1,3 +1,5 @@
+import csv
+
 import numpy
 import pandas
 import scipy
@@ -14,31 +16,26 @@ def open_data_file(file_path):
     return time, abp, cbfv
 
 
+def sniff_csv_separator(file_path):
+    with open(file_path) as fobj:
+        sample = fobj.read(1024)
+        dialect = csv.Sniffer().sniff(sample)
+        return dialect.delimiter
+
+
 def open_data_frame(file_path):
     data = pandas.read_csv(file_path, sep="\t")
     return data["Time"].values, data["MABP [mmHg]"].values, data["CBFV-L [cm/s]"].values
 
 
 def open_csv_file(file_path):
-    def _format(value):
-        return float(value.replace(",", "."))
-
-    with open(file_path) as fid:
-        header = fid.readline()
-        rows = [r.strip().split(";") for r in fid.readlines()]
-        rri, cbv, abp = [], [], []
-        for row in rows:
-            if [r.strip() for r in row] == ["", "", ""]:
-                continue
-            rri.append(_format(row[0]))
-            cbv.append(_format(row[1]))
-            abp.append(_format(row[2]))
-
-        rri = numpy.array(rri)
-        cbv = numpy.array(cbv)
-        abp = numpy.array(abp)
-        time = numpy.cumsum(rri) - rri[0]
-        return time, abp, cbv
+    sep = sniff_csv_separator(file_path)
+    data = pandas.read_csv(file_path, sep=sep)
+    rri = data.iloc[:, 0].values
+    cbv = data.iloc[:, 1].values
+    abp = data.iloc[:, 2].values
+    time = numpy.cumsum(rri) - rri[0]
+    return time, abp, cbv
 
 
 def band_indexes(frequency, lower, upper):
