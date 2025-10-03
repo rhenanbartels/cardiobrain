@@ -31,9 +31,12 @@ def open_data_frame(file_path):
 def open_csv_file(file_path):
     sep = sniff_csv_separator(file_path)
     data = pandas.read_csv(file_path, sep=sep)
-    rri = data.iloc[:, 0].values
-    cbv = data.iloc[:, 1].values
-    abp = data.iloc[:, 2].values
+    # Remove all rows which all cells are empty strings
+    data.replace(r"^\s+$", numpy.nan, inplace=True, regex=True)
+    data.dropna(how="all", inplace=True)
+    rri = data.iloc[:, 0].astype(float).values
+    cbv = data.iloc[:, 1].astype(float).values
+    abp = data.iloc[:, 2].astype(float).values
     time = numpy.cumsum(rri) - rri[0]
     return time, abp, cbv
 
