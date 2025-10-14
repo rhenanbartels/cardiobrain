@@ -23,7 +23,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CardioBrain 1.2.1</string>
+   <string>CardioBrain 1.2.2</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QMainWindow {
