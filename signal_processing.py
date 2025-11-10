@@ -188,8 +188,8 @@ def estimate_psd(
     }
     options = {**default_options, **options}
 
-    abp = options["detrend"](abp - avg_abp)
-    cbfv = options["detrend"](cbfv - avg_cbfv)
+    abp = options["detrend"](abp)
+    cbfv = options["detrend"](cbfv)
 
     interp_abp = interp_method(time, abp, fs)
     interp_cbfv = interp_method(time, cbfv, fs)
