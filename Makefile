@@ -25,4 +25,14 @@ release-linux:  # Release GNU/Linux executable
 		--dist "$$tmpdir" && \
 	echo "Final file at $$tmpdir"
 
+release-mac:
+	pyinstaller main.py \
+    --name CardioBrain \
+    --windowed \
+    --icon icons/brain.png \
+    --collect-submodules PySide6.QtWidgets \
+    --collect-submodules PySide6.QtGui \
+    --collect-submodules PySide6.QtCore \
+    --dist ./dist/16_11_2025/
+
 .PHONY: help
