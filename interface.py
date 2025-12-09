@@ -705,7 +705,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"CardioBrain 1.2.3", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"CardioBrain 1.2.4", None))
         self.menu_file_open_action.setText(QCoreApplication.translate("MainWindow", u"Open", None))
         self.menu_save_results_action.setText(QCoreApplication.translate("MainWindow", u"Save Results", None))
         self.menu_analysis_method_frequency_band.setText(QCoreApplication.translate("MainWindow", u"Frequency Band", None))
