@@ -36,7 +36,7 @@ class CustomLinearRegionItem(pg.LinearRegionItem):
         pass
 
 
-COMBO_TWIN_INDEX = 5
+COMBO_TWIN_INDEX = 6
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -151,19 +151,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.resultsTable.setItem(0, 0, __qtablewidgetitem10)
 
         # Table data
-        self.resultsTable.setRowCount(6)
+        self.resultsTable.setRowCount(7)
         self.resultsTable.setColumnCount(7)
         self.resultsTable.setColumnWidth(0, 170)
         self.resultsTable.setColumnWidth(5, 150)
         self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
-        self.resultsTable.setVerticalHeaderLabels(("", "", "", "", "", ""))
+        self.resultsTable.setVerticalHeaderLabels(("", "", "", "", "", "", ""))
 
         self.resultsTable.setItem(0, 0, QTableWidgetItem("Gain (cm.s\u207B\u00B9.mmHg\u207B\u00B9)"))
         self.resultsTable.setItem(1, 0, QTableWidgetItem("Gain norm (%.mmHg\u207B\u00B9)"))
-        self.resultsTable.setItem(2, 0, QTableWidgetItem(u"|Coh|\u00B2"))
-        self.resultsTable.setItem(3, 0, QTableWidgetItem(u"Phase (deg)"))
-        self.resultsTable.setItem(4, 0, QTableWidgetItem(u"Power ABP (mmHg\u00B2)"))
-        self.resultsTable.setItem(5, 0, QTableWidgetItem(u"Power CBFV (cm\u00B2.s\u207B\u00B2)"))
+        coherence_item = QTableWidgetItem(u"|Coh|\u00B2")
+        self.resultsTable.setItem(2, 0, coherence_item)
+        coherence_item.setToolTip("Non filtered Coherence")
+        filtered_coh_item = QTableWidgetItem(u"|Coh|\u00B2 (f)")
+        self.resultsTable.setItem(3, 0, filtered_coh_item)
+        filtered_coh_item.setToolTip("Filtered coherence")
+        self.resultsTable.setItem(4, 0, QTableWidgetItem(u"Phase (deg)"))
+        self.resultsTable.setItem(5, 0, QTableWidgetItem(u"Power ABP (mmHg\u00B2)"))
+        self.resultsTable.setItem(6, 0, QTableWidgetItem(u"Power CBFV (cm\u00B2.s\u207B\u00B2)"))
 
         self.resultsTable.setItem(0, 5, QTableWidgetItem("Avg. ABP (mmHg)"))
         self.resultsTable.setItem(1, 5, QTableWidgetItem("Avg. CBFV (cm.s\u207B\u00B9)"))
@@ -173,7 +178,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _set_empty_table(self):
         for i in range(1, 4):
-            for j in range(6):
+            for j in range(7):
                 self.resultsTable.setItem(j, i, QTableWidgetItem("-"))
 
         self.resultsTable.setItem(0, 6, QTableWidgetItem("-"))
@@ -213,20 +218,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(2, 2, QTableWidgetItem(f"{results['coherence_lf']:.3f}"))
         self.resultsTable.setItem(2, 3, QTableWidgetItem(f"{results['coherence_hf']:.3f}"))
 
+        # filtered Coherence (|Coh|^2)
+        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['filtered_coherence_vlf']:.3f}"))
+        self.resultsTable.setItem(3, 2, QTableWidgetItem(f"{results['filtered_coherence_lf']:.3f}"))
+        self.resultsTable.setItem(3, 3, QTableWidgetItem(f"{results['filtered_coherence_hf']:.3f}"))
+
         # Phase
-        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['phase_vlf']:.3f}"))
-        self.resultsTable.setItem(3, 2, QTableWidgetItem(f"{results['phase_lf']:.3f}"))
-        self.resultsTable.setItem(3, 3, QTableWidgetItem(f"{results['phase_hf']:.3f}"))
+        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['phase_vlf']:.3f}"))
+        self.resultsTable.setItem(4, 2, QTableWidgetItem(f"{results['phase_lf']:.3f}"))
+        self.resultsTable.setItem(4, 3, QTableWidgetItem(f"{results['phase_hf']:.3f}"))
 
         # Power ABP
-        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['psd_abp_vlf']:.3f}"))
-        self.resultsTable.setItem(4, 2, QTableWidgetItem(f"{results['psd_abp_lf']:.3f}"))
-        self.resultsTable.setItem(4, 3, QTableWidgetItem(f"{results['psd_abp_hf']:.3f}"))
+        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['psd_abp_vlf']:.3f}"))
+        self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['psd_abp_lf']:.3f}"))
+        self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['psd_abp_hf']:.3f}"))
 
         # Power CBFV
-        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['psd_cbfv_vlf']:.3f}"))
-        self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['psd_cbfv_lf']:.3f}"))
-        self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['psd_cbfv_hf']:.3f}"))
+        self.resultsTable.setItem(6, 1, QTableWidgetItem(f"{results['psd_cbfv_vlf']:.3f}"))
+        self.resultsTable.setItem(6, 2, QTableWidgetItem(f"{results['psd_cbfv_lf']:.3f}"))
+        self.resultsTable.setItem(6, 3, QTableWidgetItem(f"{results['psd_cbfv_hf']:.3f}"))
 
     def _fill_table_results_point_estimate(self, results):
         self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['point_estimate_gain']:.3f}"))
@@ -629,7 +639,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             1: self.plot_abp_psd,
             2: self.plot_gain,
             3: self.plot_coherence,
-            4: self.plot_phase,
+            4: self.plot_filtered_coherence,
+            5: self.plot_phase,
             COMBO_TWIN_INDEX: p_plot_abp_cbfv,
         }.get(self.topAxesComboBox.currentIndex(), lambda: None)(self.top_axes)
 
@@ -643,8 +654,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             1: self.plot_cbfv_psd,
             2: self.plot_gain,
             3: self.plot_coherence,
-            4: self.plot_phase,
-            5: p_plot_abp_cbfv,
+            4: self.plot_filtered_coherence,
+            5: self.plot_phase,
+            COMBO_TWIN_INDEX: p_plot_abp_cbfv,
         }.get(self.bottomAxesComboBox.currentIndex(), lambda: None)(self.bottom_axes)
 
     def update_roi_from_form(self):
@@ -790,6 +802,39 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.results["coherence"],
             xlabel="Frequency (Hz)",
             ylabel="|Coherence|²",
+            xlim=[0, self.hf_range[1]],
+            color="g"
+        )
+        self._add_frequency_bands_lines(axes)
+        # Add coherence threshold line
+        threshold = self.results.get("coherence_threshold", None)
+        if self.results["coherence_threshold_applied"]:
+            pen_color = "r"
+        else:
+            pen_color = "grey"
+
+        if self.results["coherence_threshold"] is None:
+            threshold = 0.5
+            pen_color = "grey"
+
+        label = f"Threshold (={threshold:.2f})"
+
+        axes.addLine(
+            x=None,
+            y=threshold,
+            pen=pg.mkPen(pen_color, width=2),
+            label=label,
+        )
+
+    def plot_filtered_coherence(self, axes):
+        axes.addLegend()
+        freq = self.results["frequency"]
+        self.plot_time_series(
+            axes,
+            freq,
+            self.results["filtered_coherence"],
+            xlabel="Frequency (Hz)",
+            ylabel="|Coherence|² (f)",
             xlim=[0, self.hf_range[1]],
             color="g"
         )

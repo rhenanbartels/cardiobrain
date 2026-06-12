@@ -850,6 +850,11 @@ QHeaderView::section {
             </item>
             <item>
              <property name="text">
+              <string>Filt. Coherence</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Phase</string>
              </property>
             </item>
@@ -945,6 +950,11 @@ QHeaderView::section {
             <item>
              <property name="text">
               <string>Coherence</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Filt. Coherence</string>
              </property>
             </item>
             <item>
@@ -1424,7 +1434,7 @@ QHeaderView::section {
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>200</height>
+           <height>230</height>
           </size>
          </property>
          <property name="frameShape">

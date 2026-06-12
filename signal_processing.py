@@ -61,7 +61,16 @@ def band_power(psd, indexes, freq_resolution):
     return 2 * numpy.nansum(psd[indexes]) * freq_resolution
 
 
-def frequency_bands_results(frequency, pxx, pyy, gain, phase, coherence, options):
+def frequency_bands_results(
+    frequency,
+    pxx,
+    pyy,
+    gain,
+    phase,
+    coherence,
+    filtered_coherence,
+    options
+):
     indexes_vlf = band_indexes(frequency, *options["vlf"])
     indexes_lf = band_indexes(frequency, *options["lf"])
     indexes_hf = band_indexes(frequency, *options["hf"])
@@ -76,6 +85,9 @@ def frequency_bands_results(frequency, pxx, pyy, gain, phase, coherence, options
         "coherence_vlf": band_coherence(coherence, indexes_vlf),
         "coherence_lf": band_coherence(coherence, indexes_lf),
         "coherence_hf": band_coherence(coherence, indexes_hf),
+        "filtered_coherence_vlf": band_coherence(filtered_coherence, indexes_vlf),
+        "filtered_coherence_lf": band_coherence(filtered_coherence, indexes_lf),
+        "filtered_coherence_hf": band_coherence(filtered_coherence, indexes_hf),
         "psd_abp_vlf": band_power(pxx, indexes_vlf, frequency[1]),
         "psd_abp_lf": band_power(pxx, indexes_lf, frequency[1]),
         "psd_abp_hf": band_power(pxx, indexes_hf, frequency[1]),
@@ -228,8 +240,11 @@ def estimate_psd(
     else:
         apply_coherence_threshold = options.get("apply_coherence_threshold")
 
+    filtered_coherence = coherence.copy()
     if apply_coherence_threshold:
-        gain[numpy.where(abs(coherence) ** 2 < coherence_threshold)[0]] = numpy.nan
+        indexes = numpy.where(abs(coherence) ** 2 < coherence_threshold)[0]
+        gain[indexes] = numpy.nan
+        filtered_coherence[indexes] = numpy.nan
 
     phase = numpy.angle(gain)
     if options.get("remove_negative_phase"):
@@ -246,6 +261,7 @@ def estimate_psd(
         "gain": abs(gain),
         "gain_norm": abs(gain) / avg_cbfv * 100,
         "coherence": abs(coherence) ** 2,
+        "filtered_coherence": abs(filtered_coherence) ** 2,
         "phase": phase,
         "coherence_threshold": coherence_threshold,
         "frequency": frequency,
@@ -284,6 +300,7 @@ def calculate_indexes(time, abp, cbfv, fs, method="tfa", interp_method=None, opt
                 results["gain"],
                 results["phase"],
                 results["coherence"],
+                results["filtered_coherence"],
                 results["avg_abp"],
                 results["avg_cbfv"],
                 options,
@@ -326,7 +343,18 @@ def point_estimate(frequency, pxx, pyy, gain, gain_norm, phase, coherence, point
     return results
 
 
-def tfa(frequency, pxx, pyy, gain, phase, coherence, avg_abp, avg_cbfv, options=None):
+def tfa(
+    frequency,
+    pxx,
+    pyy,
+    gain,
+    phase,
+    coherence,
+    filtered_coherence,
+    avg_abp,
+    avg_cbfv,
+    options=None,
+):
     if options is None:
         options = dict()
 
@@ -346,6 +374,7 @@ def tfa(frequency, pxx, pyy, gain, phase, coherence, avg_abp, avg_cbfv, options=
         gain,
         phase,
         coherence,
+        filtered_coherence,
         options
     )
     if options["normalize_cbfv"]:
