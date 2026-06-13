@@ -50,7 +50,7 @@ def band_gain(gain, indexes):
 
 
 def band_phase(phase, indexes):
-    return numpy.nanmean(phase[indexes]) / (2 * numpy.pi) * 360
+    return numpy.nanmean(phase[indexes])
 
 
 def band_coherence(coherence, indexes):
@@ -246,7 +246,7 @@ def estimate_psd(
         gain[indexes] = numpy.nan
         filtered_coherence[indexes] = numpy.nan
 
-    phase = numpy.angle(gain)
+    phase = numpy.angle(gain) / (2 * numpy.pi) * 360
     if options.get("remove_negative_phase"):
         cutoff = options.get("negative_phase_cutoff")
         indexes = numpy.where(phase[numpy.where(frequency < cutoff)[0]] < 0)
