@@ -1505,7 +1505,28 @@ QHeaderView::section {
     <addaction name="menuSettings"/>
     <addaction name="menu_save_results_action"/>
    </widget>
+   <widget class="QMenu" name="menuFilters">
+    <property name="title">
+     <string>Filters</string>
+    </property>
+    <widget class="QMenu" name="menuHampel">
+     <property name="title">
+      <string>Hampel</string>
+     </property>
+     <addaction name="menu_filters_hampel_light"/>
+     <addaction name="menu_filters_hampel_medium"/>
+     <addaction name="menu_filters_hampel_strong"/>
+     <addaction name="separator"/>
+     <addaction name="separator"/>
+     <addaction name="menu_about_hampel"/>
+    </widget>
+    <addaction name="menuHampel"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="menu_filters_get_original"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuFilters"/>
   </widget>
   <action name="menu_file_open_action">
    <property name="text">
@@ -1545,6 +1566,36 @@ QHeaderView::section {
    </property>
    <property name="text">
     <string>Ask on new File</string>
+   </property>
+  </action>
+  <action name="actionGet_original">
+   <property name="text">
+    <string>Get original</string>
+   </property>
+  </action>
+  <action name="menu_filters_hampel_light">
+   <property name="text">
+    <string>Light</string>
+   </property>
+  </action>
+  <action name="menu_filters_hampel_medium">
+   <property name="text">
+    <string>Medium</string>
+   </property>
+  </action>
+  <action name="menu_filters_hampel_strong">
+   <property name="text">
+    <string>Strong</string>
+   </property>
+  </action>
+  <action name="menu_about_hampel">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="menu_filters_get_original">
+   <property name="text">
+    <string>Original signals</string>
    </property>
   </action>
  </widget>

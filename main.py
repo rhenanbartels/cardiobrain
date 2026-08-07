@@ -21,6 +21,8 @@ import pyqtgraph as pg
 
 from components.toggle_button import ToggleButton
 from export import export_as_csv
+from filters.about_hampel import AboutHampelDialog
+from filters.hampel import hampel_filter
 from interface import Ui_MainWindow
 from signal_processing import (
     calculate_indexes,
@@ -77,6 +79,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Save results menu
         self.menu_save_results_action.setShortcut("Ctrl+S")
         self.menu_save_results_action.triggered.connect(self.save_results)
+
+        # Filters menu
+        self.menu_about_hampel.triggered.connect(self.show_about_hampel)
+        self.menu_filters_hampel_light.triggered.connect(lambda: self.filter_hampel("ligth"))
+        self.menu_filters_hampel_medium.triggered.connect(lambda: self.filter_hampel("medium"))
+        self.menu_filters_hampel_strong.triggered.connect(lambda: self.filter_hampel("strong"))
+        self.menu_filters_get_original.triggered.connect(self.filters_get_original)
 
         # Combo boxes
         self.topAxesComboBox.currentIndexChanged.connect(self.change_top_axes)
@@ -597,6 +606,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             results["filename"] = self.file_name
             export_as_csv(file_path, results, self.analysis_method_export_columns)
             self._save_last_results_dir(file_path)
+
+    def show_about_hampel(self):
+        dialog = AboutHampelDialog(self)
+        dialog.exec()
+
+    def filter_hampel(self, level):
+        _level = {"ligth": 7, "medium": 5, "strong": 3}[level]
+        self.abp = hampel_filter(self.abp, _level)
+        self.cbfv = hampel_filter(self.cbfv, _level)
+        self.plot_abp(self.top_axes)
+        self.plot_cbfv(self.bottom_axes)
+        self.safe_analyze()
+
+    def filters_get_original(self):
+        self.abp = self._original_abp.copy()
+        self.cbfv = self._original_cbfv.copy()
+        self.plot_abp(self.top_axes)
+        self.plot_cbfv(self.bottom_axes)
+        self.safe_analyze()
 
     def post_analysis(self):
         self._update_info_status(msg="Ready", status="success")
