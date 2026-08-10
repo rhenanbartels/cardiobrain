@@ -613,8 +613,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def filter_hampel(self, level):
         _level = {"ligth": 7, "medium": 5, "strong": 3}[level]
-        self.abp = hampel_filter(self.abp, _level)
-        self.cbfv = hampel_filter(self.cbfv, _level)
+        self.abp = hampel_filter(self._original_abp, _level)
+        self.cbfv = hampel_filter(self._original_cbfv, _level)
         self.plot_abp(self.top_axes)
         self.plot_cbfv(self.bottom_axes)
         self.safe_analyze()
