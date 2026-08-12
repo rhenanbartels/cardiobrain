@@ -161,11 +161,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Table data
         self.resultsTable.setRowCount(7)
-        self.resultsTable.setColumnCount(7)
+        self.resultsTable.setColumnCount(8)
         self.resultsTable.setColumnWidth(0, 170)
-        self.resultsTable.setColumnWidth(5, 150)
+        self.resultsTable.setColumnWidth(6, 150)
         self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
-        self.resultsTable.setVerticalHeaderLabels(("", "", "", "", "", "", ""))
+        self.resultsTable.setVerticalHeaderLabels(("", "", "", "", "", "", "", ""))
 
         self.resultsTable.setItem(0, 0, QTableWidgetItem("Gain (cm.s\u207B\u00B9.mmHg\u207B\u00B9)"))
         self.resultsTable.setItem(1, 0, QTableWidgetItem("Gain norm (%.mmHg\u207B\u00B9)"))
@@ -179,32 +179,32 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(5, 0, QTableWidgetItem(u"Power ABP (mmHg\u00B2)"))
         self.resultsTable.setItem(6, 0, QTableWidgetItem(u"Power CBFV (cm\u00B2.s\u207B\u00B2)"))
 
-        self.resultsTable.setItem(0, 5, QTableWidgetItem("Avg. ABP (mmHg)"))
-        self.resultsTable.setItem(1, 5, QTableWidgetItem("Avg. CBFV (cm.s\u207B\u00B9)"))
-        self.resultsTable.setItem(2, 5, QTableWidgetItem("Std. ABP (mmHg)"))
-        self.resultsTable.setItem(3, 5, QTableWidgetItem("Std. CBFV (cm.s\u207B\u00B9)"))
-        self.resultsTable.setItem(4, 5, QTableWidgetItem("# Windows"))
+        self.resultsTable.setItem(0, 6, QTableWidgetItem("Avg. ABP (mmHg)"))
+        self.resultsTable.setItem(1, 6, QTableWidgetItem("Avg. CBFV (cm.s\u207B\u00B9)"))
+        self.resultsTable.setItem(2, 6, QTableWidgetItem("Std. ABP (mmHg)"))
+        self.resultsTable.setItem(3, 6, QTableWidgetItem("Std. CBFV (cm.s\u207B\u00B9)"))
+        self.resultsTable.setItem(4, 6, QTableWidgetItem("# Windows"))
 
     def _set_empty_table(self):
-        for i in range(1, 4):
+        for i in range(1, 5):
             for j in range(7):
                 self.resultsTable.setItem(j, i, QTableWidgetItem("-"))
 
-        self.resultsTable.setItem(0, 6, QTableWidgetItem("-"))
-        self.resultsTable.setItem(1, 6, QTableWidgetItem("-"))
-        self.resultsTable.setItem(2, 6, QTableWidgetItem("-"))
-        self.resultsTable.setItem(3, 6, QTableWidgetItem("-"))
-        self.resultsTable.setItem(4, 6, QTableWidgetItem("-"))
+        self.resultsTable.setItem(0, 7, QTableWidgetItem("-"))
+        self.resultsTable.setItem(1, 7, QTableWidgetItem("-"))
+        self.resultsTable.setItem(2, 7, QTableWidgetItem("-"))
+        self.resultsTable.setItem(3, 7, QTableWidgetItem("-"))
+        self.resultsTable.setItem(4, 7, QTableWidgetItem("-"))
 
     def _fill_table_results(self, results):
         # Header
         self.resultsTable.setHorizontalHeaderLabels(self.analysis_method_table_labels)
         # Descriptive results
-        self.resultsTable.setItem(0, 6, QTableWidgetItem(f"{results['avg_abp']:.3f}"))
-        self.resultsTable.setItem(1, 6, QTableWidgetItem(f"{results['avg_cbfv']:.3f}"))
-        self.resultsTable.setItem(2, 6, QTableWidgetItem(f"{results['std_abp']:.3f}"))
-        self.resultsTable.setItem(3, 6, QTableWidgetItem(f"{results['std_cbfv']:.3f}"))
-        self.resultsTable.setItem(4, 6, QTableWidgetItem(f"{int(results['n_windows'])}"))
+        self.resultsTable.setItem(0, 7, QTableWidgetItem(f"{results['avg_abp']:.3f}"))
+        self.resultsTable.setItem(1, 7, QTableWidgetItem(f"{results['avg_cbfv']:.3f}"))
+        self.resultsTable.setItem(2, 7, QTableWidgetItem(f"{results['std_abp']:.3f}"))
+        self.resultsTable.setItem(3, 7, QTableWidgetItem(f"{results['std_cbfv']:.3f}"))
+        self.resultsTable.setItem(4, 7, QTableWidgetItem(f"{int(results['n_windows'])}"))
 
         if self.is_frequncy_band_analysis:
             self._fill_table_results_frequency_band(results)
@@ -216,44 +216,52 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['gain_vlf']:.3f}"))
         self.resultsTable.setItem(0, 2, QTableWidgetItem(f"{results['gain_lf']:.3f}"))
         self.resultsTable.setItem(0, 3, QTableWidgetItem(f"{results['gain_hf']:.3f}"))
+        self.resultsTable.setItem(0, 4, QTableWidgetItem(f"{results['gain_tp']:.3f}"))
 
         # Gain norm
         self.resultsTable.setItem(1, 1, QTableWidgetItem(f"{results['gain_vlf_norm']:.3f}"))
         self.resultsTable.setItem(1, 2, QTableWidgetItem(f"{results['gain_lf_norm']:.3f}"))
         self.resultsTable.setItem(1, 3, QTableWidgetItem(f"{results['gain_hf_norm']:.3f}"))
+        self.resultsTable.setItem(1, 4, QTableWidgetItem(f"{results['gain_tp_norm']:.3f}"))
 
         # Coherence (|Coh|^2)
         self.resultsTable.setItem(2, 1, QTableWidgetItem(f"{results['coherence_vlf']:.3f}"))
         self.resultsTable.setItem(2, 2, QTableWidgetItem(f"{results['coherence_lf']:.3f}"))
         self.resultsTable.setItem(2, 3, QTableWidgetItem(f"{results['coherence_hf']:.3f}"))
+        self.resultsTable.setItem(2, 4, QTableWidgetItem(f"{results['coherence_tp']:.3f}"))
 
         # filtered Coherence (|Coh|^2)
         self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['filtered_coherence_vlf']:.3f}"))
         self.resultsTable.setItem(3, 2, QTableWidgetItem(f"{results['filtered_coherence_lf']:.3f}"))
         self.resultsTable.setItem(3, 3, QTableWidgetItem(f"{results['filtered_coherence_hf']:.3f}"))
+        self.resultsTable.setItem(3, 4, QTableWidgetItem(f"{results['filtered_coherence_tp']:.3f}"))
 
         # Phase
         self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['phase_vlf']:.3f}"))
         self.resultsTable.setItem(4, 2, QTableWidgetItem(f"{results['phase_lf']:.3f}"))
         self.resultsTable.setItem(4, 3, QTableWidgetItem(f"{results['phase_hf']:.3f}"))
+        self.resultsTable.setItem(4, 4, QTableWidgetItem(f"{results['phase_tp']:.3f}"))
 
         # Power ABP
         self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['psd_abp_vlf']:.3f}"))
         self.resultsTable.setItem(5, 2, QTableWidgetItem(f"{results['psd_abp_lf']:.3f}"))
         self.resultsTable.setItem(5, 3, QTableWidgetItem(f"{results['psd_abp_hf']:.3f}"))
+        self.resultsTable.setItem(5, 4, QTableWidgetItem(f"{results['psd_abp_tp']:.3f}"))
 
         # Power CBFV
         self.resultsTable.setItem(6, 1, QTableWidgetItem(f"{results['psd_cbfv_vlf']:.3f}"))
         self.resultsTable.setItem(6, 2, QTableWidgetItem(f"{results['psd_cbfv_lf']:.3f}"))
         self.resultsTable.setItem(6, 3, QTableWidgetItem(f"{results['psd_cbfv_hf']:.3f}"))
+        self.resultsTable.setItem(6, 4, QTableWidgetItem(f"{results['psd_cbfv_tp']:.3f}"))
 
     def _fill_table_results_point_estimate(self, results):
         self.resultsTable.setItem(0, 1, QTableWidgetItem(f"{results['point_estimate_gain']:.3f}"))
         self.resultsTable.setItem(1, 1, QTableWidgetItem(f"{results['point_estimate_gain_norm']:.3f}"))
         self.resultsTable.setItem(2, 1, QTableWidgetItem(f"{results['point_estimate_coherence']:.3f}"))
-        self.resultsTable.setItem(3, 1, QTableWidgetItem(f"{results['point_estimate_phase']:.3f}"))
-        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['point_estimate_abp_psd']:.3f}"))
-        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['point_estimate_cbfv_psd']:.3f}"))
+        self.resultsTable.setItem(3, 1, QTableWidgetItem(results["point_estimate_filtered_coherence"]))
+        self.resultsTable.setItem(4, 1, QTableWidgetItem(f"{results['point_estimate_phase']:.3f}"))
+        self.resultsTable.setItem(5, 1, QTableWidgetItem(f"{results['point_estimate_abp_psd']:.3f}"))
+        self.resultsTable.setItem(6, 1, QTableWidgetItem(f"{results['point_estimate_cbfv_psd']:.3f}"))
 
     def _define_analysis_method(self):
         if self.menu_analysis_method_ask_on_new_file.isChecked():
@@ -319,7 +327,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @property
     def analysis_method_table_labels(self):
-        default = ("", "VLF", "LF", "HF", "", "", "")
+        default = ("", "VLF", "LF", "HF", "Total Power", "", "", "")
         return {
             "point-estimate": ("", "", "", "", "", "", ""),
         }.get(self.analysis_method, default)
@@ -331,21 +339,31 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "gain_vlf",
             "gain_lf",
             "gain_hf",
+            "gain_tp",
             "phase_vlf",
             "phase_lf",
             "phase_hf",
+            "phase_tp",
             "coherence_vlf",
             "coherence_lf",
             "coherence_hf",
+            "coherence_tp",
+            "filtered_coherence_vlf",
+            "filtered_coherence_lf",
+            "filtered_coherence_hf",
+            "filtered_coherence_tp",
             "gain_vlf_norm",
             "gain_lf_norm",
             "gain_hf_norm",
+            "gain_tp_norm",
             "psd_abp_vlf",
             "psd_abp_lf",
             "psd_abp_hf",
+            "psd_abp_tp",
             "psd_cbfv_vlf",
             "psd_cbfv_lf",
             "psd_cbfv_hf",
+            "psd_cbfv_tp",
             "coherence_threshold_applied",
             "n_windows",
             "avg_abp",
@@ -360,6 +378,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "point_estimate_gain_norm",
             "point_estimate_phase",
             "point_estimate_coherence",
+            "point_estimate_filtered_coherence",
             "point_estimate_frequency",
             "point_estimate_abp_psd",
             "point_estimate_cbfv_psd",

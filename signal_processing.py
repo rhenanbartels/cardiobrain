@@ -74,26 +74,33 @@ def frequency_bands_results(
     indexes_vlf = band_indexes(frequency, *options["vlf"])
     indexes_lf = band_indexes(frequency, *options["lf"])
     indexes_hf = band_indexes(frequency, *options["hf"])
+    indexes_tp = band_indexes(frequency, options["vlf"][0], options["hf"][1])
 
     return {
         "gain_vlf": band_gain(gain, indexes_vlf),
         "gain_lf": band_gain(gain, indexes_lf),
         "gain_hf": band_gain(gain, indexes_hf),
+        "gain_tp": band_gain(gain, indexes_tp),
         "phase_vlf": band_phase(phase, indexes_vlf),
         "phase_lf": band_phase(phase, indexes_lf),
         "phase_hf": band_phase(phase, indexes_hf),
+        "phase_tp": band_phase(phase, indexes_tp),
         "coherence_vlf": band_coherence(coherence, indexes_vlf),
         "coherence_lf": band_coherence(coherence, indexes_lf),
         "coherence_hf": band_coherence(coherence, indexes_hf),
+        "coherence_tp": band_coherence(coherence, indexes_tp),
         "filtered_coherence_vlf": band_coherence(filtered_coherence, indexes_vlf),
         "filtered_coherence_lf": band_coherence(filtered_coherence, indexes_lf),
         "filtered_coherence_hf": band_coherence(filtered_coherence, indexes_hf),
+        "filtered_coherence_tp": band_coherence(filtered_coherence, indexes_tp),
         "psd_abp_vlf": band_power(pxx, indexes_vlf, frequency[1]),
         "psd_abp_lf": band_power(pxx, indexes_lf, frequency[1]),
         "psd_abp_hf": band_power(pxx, indexes_hf, frequency[1]),
+        "psd_abp_tp": band_power(pxx, indexes_tp, frequency[1]),
         "psd_cbfv_vlf": band_power(pyy, indexes_vlf, frequency[1]),
         "psd_cbfv_lf": band_power(pyy, indexes_lf, frequency[1]),
         "psd_cbfv_hf": band_power(pyy, indexes_hf, frequency[1]),
+        "psd_cbfv_tp": band_power(pyy, indexes_tp, frequency[1]),
     }
 
 
@@ -339,6 +346,7 @@ def point_estimate(frequency, pxx, pyy, gain, gain_norm, phase, coherence, point
         "point_estimate_gain_norm": cspline(frequency, gain_norm, point_estimate_frequency),
         "point_estimate_phase": cspline(frequency, phase, point_estimate_frequency),
         "point_estimate_coherence": cspline(frequency, coherence, point_estimate_frequency),
+        "point_estimate_filtered_coherence": "-",
     }
     return results
 
@@ -381,13 +389,16 @@ def tfa(
         results["gain_vlf_norm"] = results["gain_vlf"]
         results["gain_lf_norm"] = results["gain_lf"]
         results["gain_hf_norm"] = results["gain_hf"]
+        results["gain_tp_norm"] = results["gain_tp"]
         results["gain_vlf"] = results["gain_vlf"] * avg_cbfv / 100
         results["gain_lf"] = results["gain_lf"] * avg_cbfv / 100
         results["gain_hf"] = results["gain_hf"] * avg_cbfv / 100
+        results["gain_tp"] = results["gain_tp"] * avg_cbfv / 100
     else:
         results["gain_vlf_norm"] = results["gain_vlf"] / avg_cbfv * 100
         results["gain_lf_norm"] = results["gain_lf"] / avg_cbfv * 100
         results["gain_hf_norm"] = results["gain_hf"] / avg_cbfv * 100
+        results["gain_tp_norm"] = results["gain_tp"] / avg_cbfv * 100
 
     return results
 
