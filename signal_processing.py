@@ -337,7 +337,7 @@ def point_estimate(frequency, pxx, pyy, gain, gain_norm, phase, coherence, point
         "point_estimate_cbfv_psd": cspline(frequency, pyy, point_estimate_frequency),
         "point_estimate_gain": cspline(frequency, gain, point_estimate_frequency),
         "point_estimate_gain_norm": cspline(frequency, gain_norm, point_estimate_frequency),
-        "point_estimate_phase": cspline(frequency, phase, point_estimate_frequency) / (2 * numpy.pi) * 360,
+        "point_estimate_phase": cspline(frequency, phase, point_estimate_frequency),
         "point_estimate_coherence": cspline(frequency, coherence, point_estimate_frequency),
     }
     return results
