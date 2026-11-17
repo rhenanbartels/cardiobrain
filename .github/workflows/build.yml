@@ -119,8 +119,16 @@ jobs:
           retention-days: 30
 
   build-macos:
-    name: macOS (arm64)
-    runs-on: macos-15
+    name: macOS (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15        # Apple Silicon
+            arch: arm64
+          - runner: macos-15-intel  # Intel (GitHub suporta até o fim do macOS 15, ~2027)
+            arch: x86_64
 
     steps:
       - name: Checkout código
@@ -135,14 +143,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-${{ runner.arch }}-pip-
 
       - name: Instalar dependências Python
         run: |
           python -m pip install --upgrade pip
-          # pillow: PyInstaller usa para converter o .ico em .icns no macOS
+          # pillow: PyInstaller usa para converter o .png em .icns no macOS
           pip install pyinstaller pillow
           pip install -r requirements.txt
 
@@ -154,11 +162,11 @@ jobs:
       - name: Empacotar .app
         run: |
           # ditto preserva symlinks e permissões dos frameworks Qt
-          ditto -c -k --keepParent dist/CardioBrain.app CardioBrain-macos-arm64.zip
+          ditto -c -k --keepParent dist/CardioBrain.app CardioBrain-macos-${{ matrix.arch }}.zip
 
       - name: Upload app macOS
         uses: actions/upload-artifact@v4
         with:
-          name: CardioBrain-macos-arm64
-          path: CardioBrain-macos-arm64.zip
+          name: CardioBrain-macos-${{ matrix.arch }}
+          path: CardioBrain-macos-${{ matrix.arch }}.zip
           retention-days: 30
