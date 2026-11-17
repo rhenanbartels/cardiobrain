@@ -5,6 +5,18 @@ on:
     branches: [ develop ]
   workflow_dispatch:  # permite rodar manualmente pela aba Actions
 
+# Opções do PyInstaller em um só lugar; o .spec é gerado no próprio build.
+env:
+  PYI_ARGS: >-
+    main.py
+    --name CardioBrain
+    --onefile
+    --windowed
+    --noconfirm
+    --icon icons/brain.ico
+    --add-data icons/brain.ico:.
+    --exclude-module PyQt6
+
 jobs:
   build-windows:
     name: Windows
@@ -31,13 +43,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyinstaller
-          pip install PySide6 pyqtgraph numpy pandas scipy
           pip install -r requirements.txt
         shell: pwsh
 
       - name: Build EXE
         run: |
-          python -m PyInstaller CardioBrain.spec
+          python -m PyInstaller ${{ env.PYI_ARGS }}
         shell: pwsh
 
       - name: Upload EXE
@@ -88,12 +99,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyinstaller
-          pip install PySide6 pyqtgraph numpy pandas scipy
           pip install -r requirements.txt
 
       - name: Build binário Linux
         run: |
-          python -m PyInstaller CardioBrain.spec
+          python -m PyInstaller ${{ env.PYI_ARGS }}
 
       - name: Empacotar binário Linux
         run: |
@@ -130,13 +140,13 @@ jobs:
       - name: Instalar dependências Python
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller
-          pip install PySide6 pyqtgraph numpy pandas scipy
+          # pillow: PyInstaller usa para converter o .ico em .icns no macOS
+          pip install pyinstaller pillow
           pip install -r requirements.txt
 
       - name: Build binário macOS
         run: |
-          python -m PyInstaller CardioBrain.spec
+          python -m PyInstaller ${{ env.PYI_ARGS }}
 
       - name: Empacotar binário macOS
         run: |
