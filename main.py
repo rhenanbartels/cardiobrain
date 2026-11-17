@@ -11,7 +11,7 @@ dirname = os.path.dirname(PySide6.__file__)
 plugin_path = os.path.join(dirname, 'plugins', 'platforms')
 os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = plugin_path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QPropertyAnimation, QPoint, QEasingCurve, QTimer
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMessageBox, QTableWidgetItem
 
@@ -22,7 +22,8 @@ import pyqtgraph as pg
 from components.toggle_button import ToggleButton
 from export import export_as_csv
 from filters.about_hampel import AboutHampelDialog
-from filters.hampel import hampel_filter
+from filters.dialog import FilterAlertDialog
+from filters.hampel import apply_hampel_filter, hampel_filter_mask
 from interface import Ui_MainWindow
 from signal_processing import (
     calculate_indexes,
@@ -53,6 +54,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         # Set empty analys method
         self.analysis_method = None
+        self._pending_hampel_filter = None
+        self._filter_dialog = None
 
         # Disable axes auto range button
         self.top_axes.hideButtons()
@@ -308,6 +311,104 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def _toggle_coherence_threshold(self):
         self.coherenceThreshold.setEnabled(not self.radioButtonSimulatedCoherence.isChecked())
+
+    def _show_filter_markers(self, abp_mask, cbfv_mask):
+        self._filter_markers = []
+        for axes, mask, signal in (
+            (self.top_axes, abp_mask, self._original_abp),
+            (self.bottom_axes, cbfv_mask, self._original_cbfv),
+        ):
+            if mask.any():
+                marker_item = pg.ScatterPlotItem(
+                    x=self._original_time[mask],
+                    y=signal[mask],
+                    symbol="o",
+                    size=7,
+                    brush=pg.mkBrush("r"),
+                    pen=pg.mkPen("r"),
+                )
+                axes.addItem(marker_item)
+                self._filter_markers.append((axes, marker_item))
+
+    def _remove_filter_markers(self):
+        for axes, marker_item in getattr(self, "_filter_markers", []):
+            axes.removeItem(marker_item)
+        self._filter_markers = []
+
+    def _show_filter_alert(self, abp_percent_removed, cbfv_percent_removed):
+        dialog = FilterAlertDialog(
+            abp_percent_removed,
+            cbfv_percent_removed,
+            parent=self,
+        )
+        self._filter_dialog = dialog
+        dialog.accepted.connect(self._apply_pending_hampel_filter)
+        dialog.rejected.connect(self._cancel_pending_hampel_filter)
+
+        target_x = self.geometry().x() + 350
+        target_y = self.geometry().bottom() - dialog.height()
+        start_pos = QPoint(target_x, self.geometry().bottom())
+        end_pos = QPoint(target_x, target_y)
+
+        dialog.move(start_pos)
+
+        self._alert_animation = QPropertyAnimation(dialog, b"pos")
+        self._alert_animation.setDuration(1500)
+        self._alert_animation.setStartValue(start_pos)
+        self._alert_animation.setEndValue(end_pos)
+        self._alert_animation.setEasingCurve(QEasingCurve.OutCubic)
+        dialog.show()
+        QTimer.singleShot(0, self._alert_animation.start)
+
+    def _set_signal_rois_movable(self, movable):
+        roi_states = []
+        for roi in (
+            getattr(self, "top_roi", None),
+            getattr(self, "bottom_roi", None),
+        ):
+            if roi is not None:
+                roi_states.append((roi, getattr(roi, "movable", True)))
+                roi.setMovable(movable)
+        return roi_states
+
+    def _restore_signal_rois(self, roi_states):
+        for roi, movable in roi_states:
+            roi.setMovable(movable)
+
+    def _restore_pending_marker_setting(self, show_markers):
+        self.radioButtonShowMarkers.setChecked(show_markers)
+
+    def _cancel_pending_hampel_filter(self):
+        pending_filter = self._pending_hampel_filter
+        self._remove_filter_markers()
+        self._pending_hampel_filter = None
+        self._filter_dialog = None
+        if pending_filter is not None:
+            self._restore_signal_rois(pending_filter[4])
+
+    def _apply_pending_hampel_filter(self):
+        pending_filter = self._pending_hampel_filter
+        self._remove_filter_markers()
+        self._pending_hampel_filter = None
+        self._filter_dialog = None
+        if pending_filter is None:
+            return
+
+        level, abp_mask, cbfv_mask, _, roi_states, _, _ = pending_filter
+        self.abp = apply_hampel_filter(
+            self._original_abp,
+            level,
+            abp_mask,
+        )
+        self.cbfv = apply_hampel_filter(
+            self._original_cbfv,
+            level,
+            cbfv_mask,
+        )
+        self._restore_signal_rois(roi_states)
+        self.plot_abp(self.top_axes)
+        self.plot_cbfv(self.bottom_axes)
+        self.safe_analyze()
 
     @property
     def fs(self):
@@ -631,12 +732,46 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog.exec()
 
     def filter_hampel(self, level):
+        if self._pending_hampel_filter is not None:
+            return
+
         _level = {"ligth": 7, "medium": 5, "strong": 3}[level]
-        self.abp = hampel_filter(self._original_abp, _level)
-        self.cbfv = hampel_filter(self._original_cbfv, _level)
+        abp_mask = hampel_filter_mask(self._original_abp, _level)
+        cbfv_mask = hampel_filter_mask(self._original_cbfv, _level)
+        abp_percent_removed = 100 * abp_mask.mean()
+        cbfv_percent_removed = 100 * cbfv_mask.mean()
+        show_markers = self.radioButtonShowMarkers.isChecked()
+
+        previous_abp = self.abp.copy()
+        previous_cbfv = self.cbfv.copy()
+        self._pending_hampel_filter = (
+            _level,
+            abp_mask,
+            cbfv_mask,
+            show_markers,
+            [],
+            previous_abp,
+            previous_cbfv,
+        )
+        self.abp = self._original_abp.copy()
+        self.cbfv = self._original_cbfv.copy()
+        self.radioButtonShowMarkers.setChecked(True)
         self.plot_abp(self.top_axes)
         self.plot_cbfv(self.bottom_axes)
-        self.safe_analyze()
+        self._pending_hampel_filter = (
+            _level,
+            abp_mask,
+            cbfv_mask,
+            show_markers,
+            self._set_signal_rois_movable(False),
+            previous_abp,
+            previous_cbfv,
+        )
+        self._show_filter_markers(abp_mask, cbfv_mask)
+        self._show_filter_alert(
+            abp_percent_removed,
+            cbfv_percent_removed,
+        )
 
     def filters_get_original(self):
         self.abp = self._original_abp.copy()

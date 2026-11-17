@@ -25,10 +25,14 @@ def _hampel_mask(
         median_absolute_deviation = float(
             np.median(np.abs(local_values - local_median))
         )
-        robust_scale = MAD_TO_STANDARD_DEVIATION * median_absolute_deviation
+        if median_absolute_deviation == 0:
+            robust_scale = float(np.std(local_values))
+        else:
+            robust_scale = MAD_TO_STANDARD_DEVIATION * median_absolute_deviation
         deviation = abs(float(sample_value) - local_median)
         detected_mask[sample_index] = (
-            deviation > threshold * robust_scale
+            robust_scale > 0
+            and deviation > threshold * robust_scale
         )
     return detected_mask
 
@@ -92,18 +96,16 @@ def _pass_mask(
     return detected_mask, correction_mask
 
 
-def hampel_filter(signal: np.ndarray, threshold: float) -> np.ndarray:
-    """Detect artifacts and linearly correct short segments in a 1-D signal.
-
-    The filter uses a nine-sample window, amplitude and first-difference
-    detection, and up to two passes. Segments longer than three samples or at a
-    signal boundary are detected but left unchanged.
-    """
+def _filtered_signal_and_mask(
+    signal: np.ndarray,
+    threshold: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the filtered signal and samples whose values actually changed."""
     signal = np.asarray(signal, dtype=float)
     if signal.ndim != 1:
         raise ValueError("signal must be a one-dimensional NumPy array.")
     if signal.size == 0:
-        return signal.copy()
+        return signal.copy(), np.zeros(0, dtype=bool)
     if threshold <= 0:
         raise ValueError("threshold must be greater than zero.")
 
@@ -121,7 +123,36 @@ def hampel_filter(signal: np.ndarray, threshold: float) -> np.ndarray:
             corrected_signal,
             correction_mask,
         )
-    return corrected_signal
+
+    changed_mask = corrected_signal != signal
+    return corrected_signal, changed_mask
 
 
-__all__ = ["hampel_filter"]
+def hampel_filter_mask(signal: np.ndarray, threshold: float) -> np.ndarray:
+    """Return the mask of samples that the filter would actually change."""
+    _, changed_mask = _filtered_signal_and_mask(signal, threshold)
+    return changed_mask
+
+
+def apply_hampel_filter(
+    signal: np.ndarray,
+    threshold: float,
+    mask: np.ndarray,
+) -> np.ndarray:
+    """Apply the Hampel result only to samples selected by ``mask``."""
+    signal = np.asarray(signal, dtype=float)
+    mask = np.asarray(mask, dtype=bool)
+    if mask.shape != signal.shape:
+        raise ValueError("mask must have the same shape as signal.")
+
+    filtered_signal, _ = _filtered_signal_and_mask(signal, threshold)
+    return np.where(mask, filtered_signal, signal)
+
+
+def hampel_filter(signal: np.ndarray, threshold: float) -> np.ndarray:
+    """Detect artifacts and linearly correct short segments in a 1-D signal."""
+    filtered_signal, _ = _filtered_signal_and_mask(signal, threshold)
+    return filtered_signal
+
+
+__all__ = ["apply_hampel_filter", "hampel_filter", "hampel_filter_mask"]

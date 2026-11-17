@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from filters.hampel import hampel_filter
+from filters.hampel import apply_hampel_filter, hampel_filter, hampel_filter_mask
 
 
 class HampelFilterTests(unittest.TestCase):
@@ -28,6 +28,15 @@ class HampelFilterTests(unittest.TestCase):
         filtered_signal = hampel_filter(signal, threshold=5)
 
         np.testing.assert_allclose(filtered_signal, np.arange(20, dtype=float))
+
+    def test_mask_matches_samples_changed_by_filter(self):
+        signal = np.arange(20, dtype=float)
+        signal[10] = 1000.0
+
+        mask = hampel_filter_mask(signal, threshold=5)
+        filtered_signal = apply_hampel_filter(signal, 5, mask)
+
+        np.testing.assert_array_equal(mask, filtered_signal != signal)
 
     def test_leaves_artifact_segment_longer_than_three_samples_unchanged(self):
         signal = np.arange(20, dtype=float)
