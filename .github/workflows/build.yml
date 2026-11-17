@@ -5,16 +5,18 @@ on:
     branches: [ develop ]
   workflow_dispatch:  # permite rodar manualmente pela aba Actions
 
-# Opções do PyInstaller em um só lugar; o .spec é gerado no próprio build.
+# Opções comuns do PyInstaller; o .spec é gerado no próprio build.
+# Cada job acrescenta as opções específicas do SO.
 env:
   PYI_ARGS: >-
     main.py
     --name CardioBrain
-    --onefile
     --windowed
     --noconfirm
-    --icon icons/brain.ico
     --add-data icons/brain.ico:.
+    --collect-submodules PySide6.QtWidgets
+    --collect-submodules PySide6.QtGui
+    --collect-submodules PySide6.QtCore
     --exclude-module PyQt6
 
 jobs:
@@ -48,7 +50,7 @@ jobs:
 
       - name: Build EXE
         run: |
-          python -m PyInstaller ${{ env.PYI_ARGS }}
+          python -m PyInstaller ${{ env.PYI_ARGS }} --onefile --icon icons/brain.ico
         shell: pwsh
 
       - name: Upload EXE
@@ -103,7 +105,7 @@ jobs:
 
       - name: Build binário Linux
         run: |
-          python -m PyInstaller ${{ env.PYI_ARGS }}
+          python -m PyInstaller ${{ env.PYI_ARGS }} --onefile
 
       - name: Empacotar binário Linux
         run: |
@@ -144,15 +146,17 @@ jobs:
           pip install pyinstaller pillow
           pip install -r requirements.txt
 
-      - name: Build binário macOS
+      # onedir + --windowed gera dist/CardioBrain.app (mesmo resultado do build local)
+      - name: Build app macOS
         run: |
-          python -m PyInstaller ${{ env.PYI_ARGS }}
+          python -m PyInstaller ${{ env.PYI_ARGS }} --icon icons/brain.png
 
-      - name: Empacotar binário macOS
+      - name: Empacotar .app
         run: |
-          ditto -c -k --keepParent dist/CardioBrain CardioBrain-macos-arm64.zip
+          # ditto preserva symlinks e permissões dos frameworks Qt
+          ditto -c -k --keepParent dist/CardioBrain.app CardioBrain-macos-arm64.zip
 
-      - name: Upload binário macOS
+      - name: Upload app macOS
         uses: actions/upload-artifact@v4
         with:
           name: CardioBrain-macos-arm64
