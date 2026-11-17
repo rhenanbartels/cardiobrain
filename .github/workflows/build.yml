@@ -37,13 +37,13 @@ jobs:
 
       - name: Build EXE
         run: |
-          python -m PyInstaller PartialCoherence.spec
+          python -m PyInstaller CardioBrain.spec
         shell: pwsh
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: PartialCoherence-windows
+          name: CardioBrain-windows
           path: dist\CardioBrain.exe
           retention-days: 30
 
@@ -93,7 +93,7 @@ jobs:
 
       - name: Build binário Linux
         run: |
-          python -m PyInstaller PartialCoherence.spec
+          python -m PyInstaller CardioBrain.spec
 
       - name: Empacotar binário Linux
         run: |
@@ -102,7 +102,7 @@ jobs:
       - name: Upload binário Linux
         uses: actions/upload-artifact@v4
         with:
-          name: PartialCoherence-linux
+          name: CardioBrain-linux
           path: CardioBrain-linux.tar.gz
           retention-days: 30
 
@@ -136,7 +136,7 @@ jobs:
 
       - name: Build binário macOS
         run: |
-          python -m PyInstaller PartialCoherence.spec
+          python -m PyInstaller CardioBrain.spec
 
       - name: Empacotar binário macOS
         run: |
@@ -145,6 +145,6 @@ jobs:
       - name: Upload binário macOS
         uses: actions/upload-artifact@v4
         with:
-          name: PartialCoherence-macos-arm64
+          name: CardioBrain-macos-arm64
           path: CardioBrain-macos-arm64.zip
           retention-days: 30
