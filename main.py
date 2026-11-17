@@ -339,6 +339,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dialog = FilterAlertDialog(
             abp_percent_removed,
             cbfv_percent_removed,
+            target=self.resultsTable,
             parent=self,
         )
         self._filter_dialog = dialog

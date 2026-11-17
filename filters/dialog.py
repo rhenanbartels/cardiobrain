@@ -1,21 +1,21 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QPoint
 from PySide6.QtWidgets import (
-    QDialog, QLabel, QPushButton, QVBoxLayout, QHBoxLayout
+    QDialog, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QLayout
 )
 
 
 class FilterAlertDialog(QDialog):
-    def __init__(self, abp_percent_removed, cbfv_percent_removed, parent=None):
+    def __init__(self, abp_percent_removed, cbfv_percent_removed, target, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Tool)
-        self.setFixedSize(1500, 230)
+        layout = QVBoxLayout(self)
+        self.setFixedSize(target.size())
+        self.move(target.mapToGlobal(QPoint(0, 0)))
         self.setStyleSheet(
             "background-color: black; "
             "color: rgb(152, 152, 152);; "
             "border: 0.5px solid rgb(152, 152, 152);;"
         )
-
-        layout = QVBoxLayout(self)
 
         message = QLabel(
             "The selected filter will alter:\n\n"
